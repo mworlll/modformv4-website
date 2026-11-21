@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="MODFORM 汽车用品与车居美学商家运营后台，支持多SKU独立定价、CSV批量导入导出、售后RMA审核与数据库备份。">
+  <meta name="theme-color" content="#090a0c">
+  <link id="site-favicon" rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <title>MODFORM · 汽车用品与车居美学商家运营后台</title>
+  <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="style.css?v=20261120v4">
+</head>
+<body>
+
+  <!-- 1. 商家后台锁屏登录（服务端 PBKDF2 鉴权） -->
+  <div id="admin-login-screen" class="admin-auth-screen">
+    <div class="admin-login-card">
+      <span class="neon-tag">MERCHANT ADMIN</span>
+      <h1 style="font-size:1.5rem; margin:6px 0 8px;">MODFORM 商家后台</h1>
+      <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:20px;">MODFORM 汽车用品与车居美学独立运营中心</p>
+
+      <form id="admin-login-form" class="clean-form">
+        <div class="field" style="text-align:left;">
+          <label for="admin-pwd-input">管理员密码</label>
+          <input type="password" id="admin-pwd-input" placeholder="请输入商家后台密码" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="neon-primary-btn full-width">验证进入后台</button>
+        <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+          <button type="button" id="open-forgot-pwd-btn" style="background:none; border:none; color:var(--neon-lime); font-size:0.8rem; cursor:pointer; padding:2px 0;">忘记密码？通过邮箱 / 手机号找回</button>
+        </div>
+      </form>
+
+      <p class="admin-auth-note">服务端已启用 PBKDF2 密码哈希、会话 Token 鉴权与防爆破限流保护。</p>
+      <div style="margin-top:16px;">
+        <a href="index.html" style="font-size:0.82rem; color:var(--text-muted); text-decoration:none;">← 返回买家前台商店</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 商家后台主界面 -->
+  <div id="admin-workspace" style="display: none;">
+    <header class="admin-topbar">
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <strong style="font-style:italic; letter-spacing:0.1em; font-size:1.1rem;">MODFORM</strong>
+        <span class="neon-tag" style="margin-bottom:0;">汽车升级商家端 Pro</span>
+        <span id="server-sync-badge" class="status-pill" style="font-size:0.75rem;">正在检测数据引擎...</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <a href="index.html" target="_blank" rel="noopener noreferrer" class="dark-outline-btn" style="text-decoration:none; padding:6px 12px; font-size:0.82rem;">打开买家前台 ↗</a>
+        <button type="button" class="dark-outline-btn" id="admin-lock-btn" style="padding:6px 12px; font-size:0.82rem;">锁定退出</button>
+      </div>
+    </header>
+
+    <main class="subpage-container" style="padding: 26px 4% 80px;">
+      <div class="admin-header-bar">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+          <div>
+            <h2 style="font-size:1.45rem; margin:0;">MODFORM 全链路运营中心</h2>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin:4px 0 0;">商品、订单、客户与前台主题统一管理，保存即实时同步买家端。</p>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="dark-outline-btn" id="quick-go-publish-btn" style="padding:6px 12px; font-size:0.78rem;">+ 发布新商品</button>
+            <button type="button" class="dark-outline-btn" id="quick-go-cms-btn" style="padding:6px 12px; font-size:0.78rem;">🎨 店铺装修</button>
+          </div>
+        </div>
+        <div class="ops-kpi-strip" id="ops-kpi-strip">
+          <button type="button" class="ops-kpi-card" data-jump-tab="orders">
+            <span class="ops-kpi-label">待处理订单</span>
+            <strong class="ops-kpi-val" id="kpi-pending-orders">0</strong>
+            <span class="ops-kpi-sub">点击前往核销 / 发货 →</span>
+          </button>
+          <button type="button" class="ops-kpi-card" data-jump-tab="products">
+            <span class="ops-kpi-label">在售商品 / 低库存</span>
+            <strong class="ops-kpi-val" id="kpi-active-prods">0</strong>
+            <span class="ops-kpi-sub" id="kpi-low-stock-sub">低库存预警 0 款 →</span>
+          </button>
+          <button type="button" class="ops-kpi-card" data-jump-tab="reviews">
+            <span class="ops-kpi-label">待回复留言 & 问答</span>
+            <strong class="ops-kpi-val" id="kpi-pending-inbox">0</strong>
+            <span class="ops-kpi-sub">点击查看收件箱 →</span>
+          </button>
+          <button type="button" class="ops-kpi-card" data-jump-tab="analytics">
+            <span class="ops-kpi-label">累计真实成交额</span>
+            <strong class="ops-kpi-val" id="kpi-total-gmv">¥0</strong>
+            <span class="ops-kpi-sub">查看经营报表 →</span>
+          </button>
+        </div>
+          <p style="font-size:0.82rem; color:var(--text-muted);">订单履约与售后RMA审核 · 多SKU商品全字段编辑与CSV导入导出 · 晒图评价管理 · 多轮播图装修与数据库备份</p>
+        </div>
+        <div class="admin-nav-tabs">
+          <button type="button" class="admin-tab-btn active" data-admin-tab="orders">📦 订单与售后</button>
+          <button type="button" class="admin-tab-btn" data-admin-tab="products">🛍 商品与多SKU库存</button>
+          <button type="button" class="admin-tab-btn" data-admin-tab="reviews">💬 晒图评价管理</button>
+          <button type="button" class="admin-tab-btn" data-admin-tab="customers">👥 客户CRM</button>
+          <button type="button" class="admin-tab-btn" data-admin-tab="discounts">🏷️ 折扣码营销</button>
+          <button type="button" class="admin-tab-btn" data-admin-tab="analytics">📊 真实数据报表</button>
+          <button type="button" class="admin-tab-btn" data-admin-tab="cms">🎨 装修、支付与备份</button>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 面板 1：订单履约、支付核销与售后退换货 (RMA) -->
+      <!-- ========================================== -->
+      <div id="admin-tab-orders" class="admin-panel">
+        <div class="admin-kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">有效订单实收总额 (GMV)</span>
+            <strong class="kpi-value" id="kpi-revenue">¥0.0</strong>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">待发货 / 售后待审订单</span>
+            <strong class="kpi-value" id="kpi-pending" style="color:#f59e0b;">0 单</strong>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">平均客单价 (AOV)</span>
+            <strong class="kpi-value" id="kpi-aov">¥0.0</strong>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">低库存 / 缺货预警商品</span>
+            <strong class="kpi-value" id="kpi-low-stock" style="color:#f43f5e;">0 款</strong>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin: 20px 0 12px;">
+          <h4 style="font-size:0.98rem;">实时买家订单队列（支持一键核销收款、录入快递单号、审核退换货售后与取消回滚库存）</h4>
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="dark-outline-btn" id="refresh-orders-btn" style="padding:6px 12px; font-size:0.8rem;">同步最新数据</button>
+            <button type="button" class="neon-primary-btn" id="export-csv-btn" style="padding:6px 14px; font-size:0.8rem;">导出发货清单 (.csv)</button>
+          </div>
+        </div>
+
+        <div class="admin-order-toolbar">
+          <div class="buyer-order-tabs" id="admin-order-status-tabs">
+            <button type="button" class="order-filter-pill active" data-admin-order-status="all">全部订单</button>
+            <button type="button" class="order-filter-pill" data-admin-order-status="待核验收款">待核验收款</button>
+            <button type="button" class="order-filter-pill" data-admin-order-status="已付款·待发货">待发货</button>
+            <button type="button" class="order-filter-pill" data-admin-order-status="已发货">已发货</button>
+            <button type="button" class="order-filter-pill" data-admin-order-status="售后处理中">售后待审</button>
+            <button type="button" class="order-filter-pill is-express-pill" data-admin-order-status="express">⚡ 极速达加急</button>
+          </div>
+          <input type="search" id="admin-order-search" placeholder="搜索订单号 / 手机号 / 收货人..." class="admin-search-input">
+        </div>
+        <div class="admin-batch-bar" id="admin-order-batch-bar">
+          <label class="cart-select-all-label"><input type="checkbox" id="admin-order-select-all"> 全选当前订单</label>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="dark-outline-btn" id="batch-confirm-pay-btn" style="padding:4px 10px; font-size:0.76rem; color:var(--neon-lime);">✓ 批量核验收款</button>
+            <button type="button" class="dark-outline-btn" id="batch-mark-shipped-btn" style="padding:4px 10px; font-size:0.76rem; color:#10b981;">🚚 批量标记已发货</button>
+            <button type="button" class="dark-outline-btn" id="batch-print-orders-btn" style="padding:4px 10px; font-size:0.76rem;">🖨️ 打印选中装箱单</button>
+          </div>
+        </div>
+        <div id="admin-orders-list"></div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 面板 2：商品上架、多SKU、CSV批量导入导出与模板管理 -->
+      <!-- ========================================== -->
+      <div id="admin-tab-products" class="admin-panel" style="display: none;">
+        <!-- 顶部模板、库存与 CSV 批量工具栏 -->
+        <div class="admin-form-box" style="margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h4 style="color:var(--neon-lime); margin-bottom:4px;">🛠️ 商品库与库存批量管理（CSV 导入 / 导出）</h4>
+            <p style="font-size:0.8rem; color:var(--text-muted);">支持将全站商品导出为 Excel (.csv) 表格批量修改价格与库存后一键导入，或快速批量调整库存状态。</p>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button type="button" class="neon-primary-btn" id="export-products-csv-btn" style="padding:6px 12px; font-size:0.78rem;">📤 导出商品库 CSV</button>
+            <input type="file" id="import-products-csv-input" accept=".csv,text/csv" style="display:none;">
+            <button type="button" class="dark-outline-btn" id="import-products-csv-btn" style="padding:6px 12px; font-size:0.78rem; color:var(--neon-lime); border-color:rgba(216,255,0,0.4);">📥 批量导入商品 CSV</button>
+            <button type="button" class="dark-outline-btn" id="batch-zero-stock-btn" style="padding:6px 12px; font-size:0.78rem;">📦 全店库存清零</button>
+            <button type="button" class="dark-outline-btn" id="batch-set-stock-btn" style="padding:6px 12px; font-size:0.78rem;">🔢 批量设库存</button>
+          </div>
+        </div>
+
+        <div class="admin-publish-grid">
+          <form id="admin-publish-form" class="clean-form admin-form-box">
+            <h4 style="margin-bottom:12px; color:var(--neon-lime);">➕ 发布新汽车用品 / 车用配件（支持多图上传与多SKU）</h4>
+
+            <div class="form-row-2">
+              <div class="field">
+                <label>商品名称 *</label>
+                <input type="text" id="pub-name" placeholder="例如：干碳纤维磁吸车载手机支架" required>
+                <div style="display:flex; gap:8px; margin-top:6px;">
+                  <input type="text" id="pub-name-en" placeholder="English Title (选填，切换 EN 时显示)" style="flex:1;">
+                  <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; color:#d8ff00; white-space:nowrap; padding:0 10px; border:1px solid rgba(216,255,0,0.3); border-radius:8px; cursor:pointer;">
+                    <input type="checkbox" id="pub-is-new-arrival"> 设为新品首推
+                  </label>
+                </div>
+              </div>
+              <div class="field">
+                <label>所属升级/用品类目 *</label>
+                <select id="pub-cat" class="dark-select">
+                  <option value="interior">内饰美学 (INTERIOR)</option>
+                  <option value="exterior">外观升级 (EXTERIOR)</option>
+                  <option value="storage">车载储物 (STORAGE)</option>
+                  <option value="scent">车载香薰 (FRAGRANCE)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field">
+                <label>基础零售价格 (¥) *</label>
+                <input type="number" step="0.1" id="pub-price" min="0.1" placeholder="例如：59.9" required>
+              </div>
+              <div class="field">
+                <label>真实总库存 (件) *</label>
+                <input type="number" id="pub-stock" placeholder="例如：50" min="0" required>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field">
+                <label>适配车型大类 *</label>
+                <select id="pub-fit" class="dark-select">
+                  <option value="universal">全车型通用款</option>
+                  <option value="sedan">轿车 / 轿跑升级</option>
+                  <option value="suv">SUV / 越野收纳</option>
+                  <option value="ev">新能源汽车专属</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>适配具体说明 *</label>
+                <input type="text" id="pub-fit-text" placeholder="例如：特斯拉 Model 3/Y 专车开模" required>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field">
+                <label>专车适配品牌/车型关键词（选填，防买错核验）</label>
+                <input type="text" id="pub-fit-brands" placeholder="如：universal 或 小米 SU7, Tesla Model 3">
+              </div>
+              <div class="field">
+                <label>适用年份范围</label>
+                <input type="text" id="pub-fit-years" placeholder="如：2020-2026">
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field">
+                <label>角标标签（选填）</label>
+                <input type="text" id="pub-badge" placeholder="例如：新品首发 / 专车定制">
+              </div>
+              <div class="field">
+                <label>1688 货源链接（供后台一键采购代发）</label>
+                <input type="url" id="pub-source-url" placeholder="https://detail.1688.com/...">
+              </div>
+            </div>
+
+            <div class="field">
+              <label>商品展示图片（直接点击添加图片，支持一次多选，第 1 张为主图）*</label>
+              <div class="admin-multi-img-box">
+                <input type="file" id="pub-multi-img-input" accept="image/*" multiple style="display:none;">
+                <div id="pub-images-grid" class="admin-images-grid"></div>
+                <button type="button" class="admin-add-img-tile" id="pub-add-images-btn">
+                  <span>+</span>
+                  <small>添加图片</small>
+                </button>
+              </div>
+            </div>
+
+            <div class="field">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <label style="margin-bottom:0;">多规格 SKU 独立定价与库存 *</label>
+                <button type="button" class="dark-outline-btn" id="pub-add-sku-row-btn" style="padding:3px 9px; font-size:0.74rem; color:var(--neon-lime);">+ 添加规格行</button>
+              </div>
+              <div id="pub-sku-editor" class="sku-table-editor"></div>
+              <input type="hidden" id="pub-variants" value="">
+            </div>
+
+            <div class="form-row-2">
+              <div class="field">
+                <label>核心卖点标签（逗号隔开）</label>
+                <input type="text" id="pub-specs" placeholder="如：原车开模, 无损安装, 一年质保（逗号隔开）">
+              </div>
+              <div class="field">
+                <label>安装视频链接（选填，MP4 或视频网址）</label>
+                <input type="text" id="pub-video-url" placeholder="https://...">
+              </div>
+            </div>
+
+            <div class="field">
+              <label>一句话卖点副标题 *</label>
+              <input type="text" id="pub-sub" placeholder="简短描述商品核心材质、升级效果或解决的痛点" required>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field">
+                <label>主体材质说明</label>
+                <input type="text" id="pub-material" placeholder="例如：航空铝合金 / Alcantara 翻毛皮">
+              </div>
+              <div class="field">
+                <label>无损安装说明</label>
+                <input type="text" id="pub-install" placeholder="例如：卡扣直装 / 3M 无损背胶固定">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+                  <input type="text" id="pub-diy-diff" placeholder="DIY难度（如 ★☆☆☆☆ 新手无损）">
+                  <input type="text" id="pub-diy-time" placeholder="预计耗时（如 约 5 分钟）">
+                </div>
+                <input type="text" id="pub-box-contents" placeholder="包装清单（逗号分隔，如 主体×1, 撬棒×1, 擦拭布×1）" style="margin-top:8px;">
+                <input type="text" id="pub-sub-en" placeholder="English Subtitle (选填，切换 EN 时显示)" style="margin-top:8px;">
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+              <button type="button" class="dark-outline-btn" id="pub-reset-form-btn" style="padding:0 16px;">清空表单</button>
+              <button type="submit" class="neon-primary-btn" style="flex:1;">立即上架发布到前台</button>
+            </div>
+          </form>
+
+          <!-- 右侧：全站商品与库存管理 -->
+          <div class="admin-form-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+              <h4>全站商品与库存列表（共 <span id="all-active-prod-count">0</span> 款，上架 <span id="onsale-prod-count">0</span> 款）</h4>
+            </div>
+
+            <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+              <input type="text" id="admin-prod-search" placeholder="搜索商品名称、材质、SKU或适配车型..." style="flex:1; min-width:160px; padding:7px 10px; background:var(--bg-card); border:1px solid var(--border-dark); border-radius:4px; color:#fff; font-size:0.82rem;">
+              <div class="admin-quick-filter-pills" id="admin-prod-quick-filters" style="display:flex;gap:6px;flex-wrap:wrap;margin-right:6px;">
+                <button type="button" class="dark-outline-btn admin-qf-btn active" data-qf="all" style="padding:5px 10px;font-size:0.76rem;">全部</button>
+                <button type="button" class="dark-outline-btn admin-qf-btn" data-qf="low-stock-5" style="padding:5px 10px;font-size:0.76rem;color:#fbbf24;">⚠ 低库存 ≤5</button>
+                <button type="button" class="dark-outline-btn admin-qf-btn" data-qf="off-sale" style="padding:5px 10px;font-size:0.76rem;color:#f87171;">已下架</button>
+                <button type="button" class="dark-outline-btn admin-qf-btn" data-qf="new-arrival" style="padding:5px 10px;font-size:0.76rem;color:#d8ff00;">🔥 新品首推</button>
+              </div>
+              <select id="admin-prod-cat-filter" style="padding:7px 10px; background:var(--bg-card); border:1px solid var(--border-dark); border-radius:4px; color:#fff; font-size:0.82rem;">
+                <option value="all">全部类目</option>
+                <option value="interior">内饰美学</option>
+                <option value="exterior">外观升级</option>
+                <option value="storage">车载储物</option>
+                <option value="scent">车载香薰</option>
+                <option value="custom-only">🏷️ 仅看商家自建/已改商品</option>
+                <option value="new-arrival">🔥 仅看新品首推</option>
+                  <option value="low-stock">⚠️ 低库存预警 (1~10)</option>
+                <option value="out-of-stock">🚫 已售罄 / 0库存</option>
+                <option value="off-sale">📦 已下架隐藏</option>
+              </select>
+            </div>
+
+            <div class="admin-batch-bar" id="admin-prod-batch-bar">
+              <label class="cart-select-all-label"><input type="checkbox" id="admin-prod-select-all"> 全选当前</label>
+              <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                <button type="button" class="dark-outline-btn" id="batch-prod-onsale-btn" style="padding:3px 8px; font-size:0.72rem; color:#10b981;">批量上架</button>
+                <button type="button" class="dark-outline-btn" id="batch-prod-offsale-btn" style="padding:3px 8px; font-size:0.72rem; color:#f59e0b;">批量下架</button>
+                <button type="button" class="dark-outline-btn" id="batch-prod-newdrop-btn" style="padding:3px 8px; font-size:0.72rem; color:var(--neon-lime);">批量设首推</button>
+                <button type="button" class="dark-outline-btn" id="batch-prod-price-btn" style="padding:3px 8px; font-size:0.72rem;">批量调价</button>
+              </div>
+            </div>
+            <div id="admin-all-products-list" style="max-height:700px; overflow-y:auto; padding-right:4px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 面板 3：晒图评价管理（支持已购车主认证标识） -->
+      <!-- ========================================== -->
+      <div id="admin-tab-reviews" class="admin-panel" style="display: none;">
+        <div class="admin-publish-grid">
+          <form id="admin-add-review-form" class="clean-form admin-form-box">
+            <h4 style="margin-bottom:10px; color:var(--neon-lime);">➕ 录入真实车主评价 / 线下升级买家秀</h4>
+            <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;">支持上传车主升级实拍图并标记「✓ 已购车主认证」。</p>
+            <div class="field">
+              <label>选择对应商品 *</label>
+              <select id="rev-prod-select" class="dark-select" required></select>
+            </div>
+            <div class="form-row-2">
+              <div class="field">
+                <label>车主称呼 *</label>
+                <input type="text" id="rev-user-input" placeholder="例如：张先生 / 粤B思域车主" required>
+              </div>
+              <div class="field">
+                <label>安装爱车车型 *</label>
+                <input type="text" id="rev-car-input" placeholder="例如：24款Model 3 / 思域" required>
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="field">
+                <label>评价星级 *</label>
+                <select id="rev-rating-select" class="dark-select">
+                  <option value="★★★★★">★★★★★ (5星好评)</option>
+                  <option value="★★★★☆">★★★★☆ (4星满意)</option>
+                  <option value="★★★☆☆">★★★☆☆ (3星一般)</option>
+                  <option value="★★☆☆☆">★★☆☆☆ (2星有待改进)</option>
+                  <option value="★☆☆☆☆">★☆☆☆☆ (1星差评)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>车主认证标签</label>
+                <select id="rev-verified-select" class="dark-select">
+                  <option value="true">✓ 标记为「已购车主认证」</option>
+                  <option value="false">普通车友评价</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>上传买家秀装车实拍图（选填）</label>
+              <input type="file" id="admin-rev-photo-file" accept="image/*" style="font-size:0.8rem;">
+            </div>
+            <div class="field">
+              <label>评价详情内容 *</label>
+              <textarea id="rev-text-input" rows="2" placeholder="输入车主的真实安装体验与评价..." required></textarea>
+            </div>
+            <div class="field">
+              <label>官方商家回复（选填）</label>
+              <input type="text" id="rev-reply-input" placeholder="例如：感谢老铁支持！祝您用车愉快~">
+            </div>
+            <button type="submit" class="neon-primary-btn full-width">发布评价到该商品页</button>
+          </form>
+
+          <div class="admin-form-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+              <h4>💬 全站商品评价列表（共 <span id="admin-reviews-total-count">0</span> 条）</h4>
+              <button type="button" class="dark-outline-btn" id="clear-all-reviews-btn" style="padding:4px 10px; font-size:0.76rem; color:#f43f5e;">🗑️ 清空全部评价</button>
+            </div>
+            <div id="admin-reviews-list" style="max-height:560px; overflow-y:auto;"></div>
+          </div>
+        </div>
+              <div class="admin-form-box" style="margin-top:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+            <div>
+              <h4 style="color:var(--neon-lime); margin-bottom:2px;">❓ 车友问答 Q&amp;A 回复与管理（待回复 <span id="admin-qa-pending-count">0</span> 条）</h4>
+              <p style="font-size:0.78rem; color:var(--text-muted);">买家在商品详情页提交的车型适配或安装提问将汇集于此，回复后立即同步展示在前台商品页。</p>
+            </div>
+          </div>
+          <div id="admin-qa-list"></div>
+          <div style="margin-top:26px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.08);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+              <h3 style="margin:0; font-size:1rem;">📩 客户 Contact 留言收件箱</h3>
+              <span style="font-size:0.8rem; color:#d8ff00;">待处理：<strong id="admin-contact-unread-count">0</strong> 条</span>
+            </div>
+            <div id="admin-contact-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 面板 4：客户管理 (Customers CRM)    -->
+      <!-- ========================================== -->
+      <div id="admin-tab-customers" class="admin-panel" style="display: none;">
+        <div class="admin-form-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+            <div>
+              <h4 style="color:var(--neon-lime);">👥 客户档案与消费价值分析 (Customers CRM)</h4>
+              <p style="font-size:0.8rem; color:var(--text-muted);">自动合并加密注册会员与有效下单买家数据，识别高价值 VIP 车主与适配车型偏好。</p>
+            </div>
+            <span id="crm-total-badge" class="status-pill shipped">共 0 位客户</span>
+          </div>
+          <div id="admin-customers-list"></div>
+          <div style="margin-top:26px; padding-top:20px; border-top:1px solid var(--border-dark);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+              <div>
+                <h4 style="color:var(--neon-lime); margin-bottom:2px;">📧 邮件订阅客户列表 (<span id="admin-subscribers-count">0</span>)</h4>
+                <p style="font-size:0.78rem; color:var(--text-muted);">来自前台底部荧光绿订阅栏的真实邮箱，可一键导出用于新品通知。</p>
+              </div>
+              <button type="button" class="dark-outline-btn" id="export-subscribers-csv-btn" style="padding:6px 12px; font-size:0.78rem;">📤 导出订阅邮箱 (.csv)</button>
+            </div>
+            <div id="admin-subscribers-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 面板 5：多折扣码营销中心 (Discounts) -->
+      <!-- ========================================== -->
+      <div id="admin-tab-discounts" class="admin-panel" style="display: none;">
+        <div class="admin-publish-grid">
+          <form id="admin-discount-form" class="clean-form admin-form-box">
+            <h4 style="margin-bottom:12px; color:var(--neon-lime);">🏷️ 创建新折扣码</h4>
+            <div class="field">
+              <label>折扣码名称（英文/数字，买家结账时输入）*</label>
+              <input type="text" id="disc-code" placeholder="例如：VIP88 或 NEW20" style="text-transform:uppercase;" required>
+            </div>
+            <div class="form-row-2">
+              <div class="field">
+                <label>优惠类型 *</label>
+                <select id="disc-type" class="dark-select">
+                  <option value="fixed">固定金额立减 (¥)</option>
+                  <option value="percent">百分比折扣 (如 85 = 8.5折)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>优惠数值（减多少元 或 几折）*</label>
+                <input type="number" step="0.1" id="disc-value" min="0.1" placeholder="如 15 或 85" required>
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="field">
+                <label>最低消费门槛 (¥，0为无门槛) *</label>
+                <input type="number" id="disc-min" value="0" min="0" required>
+              </div>
+              <div class="field">
+                <label>活动备注说明</label>
+                <input type="text" id="disc-desc" placeholder="例如：老车主专属8.5折">
+              </div>
+            </div>
+            <button type="submit" class="neon-primary-btn full-width">创建并启用折扣码</button>
+          </form>
+
+          <div class="admin-form-box">
+            <h4 style="margin-bottom:12px;">当前促销折扣码列表（结账时由服务端校验门槛与减免）</h4>
+            <div id="admin-discounts-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 面板 6：真实经营数据与好坏商品报表            -->
+      <!-- ========================================== -->
+      <div id="admin-tab-analytics" class="admin-panel" style="display: none;">
+        <div class="admin-form-box" style="margin-bottom:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+            <div>
+              <h4 style="color:var(--neon-lime); margin-bottom:2px;">📈 每日成交额趋势 (GMV)</h4>
+              <p style="font-size:0.78rem; color:var(--text-muted);" id="analytics-range-summary">统计周期：全部时间</p>
+            </div>
+            <div class="buyer-order-tabs" id="analytics-range-tabs" style="margin-bottom:0;">
+              <button type="button" class="order-filter-pill active" data-range="all">全部时间</button>
+              <button type="button" class="order-filter-pill" data-range="7d">近 7 天</button>
+              <button type="button" class="order-filter-pill" data-range="30d">近 30 天</button>
+              <button type="button" class="order-filter-pill" data-range="month">本月</button>
+            </div>
+          </div>
+          <div id="analytics-daily-trend-chart" style="width:100%; overflow-x:auto;"></div>
+        </div>
+        <div class="admin-form-box" style="margin-bottom:20px;">
+          <h4 style="color:var(--neon-lime); margin-bottom:6px;">📈 四大汽车用品与车居美学类目真实营收占比</h4>
+          <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:14px;">完全基于真实有效订单销量（剔除已取消与已退款订单）实时统计。</p>
+          <div id="analytics-category-bars"></div>
+        </div>
+
+        <div class="admin-publish-grid">
+          <div class="admin-form-box">
+            <h4 style="color:var(--neon-lime); margin-bottom:12px;">🏆 真实销量榜（TOP 8）</h4>
+            <div id="analytics-bestsellers"></div>
+          </div>
+
+          <div class="admin-form-box">
+            <h4 style="color:#f59e0b; margin-bottom:12px;">⚠️ 零销量 / 待优化商品列表（点击可全字段编辑调价）</h4>
+            <div id="analytics-slowmovers"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 面板 7：三屏轮播可视化装修、支付网关与全站备份 -->
+      <!-- ========================================== -->
+      <div id="admin-tab-cms" class="admin-panel" style="display: none;">
+        <div class="admin-publish-grid">
+          <form id="admin-cms-form" class="clean-form admin-form-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+              <div>
+                <h4 style="margin:0; color:var(--neon-lime);">🎨 在线商店全量主题装修</h4>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin:4px 0 0;">买家端所有文案、配色、图片、板块显隐、品类名称与页脚政策均可在此实时修改。</p>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <button type="button" class="neon-primary-btn" id="open-live-preview-btn" style="padding:6px 12px; font-size:0.78rem;">📱 实时预览窗口</button>
+                <a href="index.html" target="_blank" class="dark-outline-btn" style="padding:6px 12px; font-size:0.78rem; text-decoration:none;" rel="noopener noreferrer">打开买家端 ↗</a>
+                <button type="button" class="dark-outline-btn" id="cms-export-theme-btn" style="padding:6px 10px; font-size:0.76rem;">导出主题 JSON</button>
+                <input type="file" id="cms-import-theme-input" accept=".json,application/json" style="display:none;">
+                <button type="button" class="dark-outline-btn" id="cms-import-theme-btn" style="padding:6px 10px; font-size:0.76rem;">导入主题</button>
+                <button type="button" class="dark-outline-btn" id="cms-toggle-all-btn" style="padding:6px 10px; font-size:0.76rem;">全部展开/收起</button>
+                <button type="button" class="dark-outline-btn" id="cms-reset-all-btn" style="padding:6px 10px; font-size:0.76rem; color:#f87171;">恢复默认</button>
+              </div>
+            </div>
+
+            <!-- 一键主题风格预设条 -->
+            <div class="cms-preset-bar">
+              <span class="cms-preset-label">⚡ 一键切换风格预设：</span>
+              <button type="button" class="cms-preset-chip" data-preset="modform-lime"><span class="swatch" style="background:#d8ff00;"></span>暗夜荧光绿</button>
+              <button type="button" class="cms-preset-chip" data-preset="minimal-titanium"><span class="swatch" style="background:#f8fafc;"></span>极简钛灰白</button>
+              <button type="button" class="cms-preset-chip" data-preset="track-amber"><span class="swatch" style="background:#ff7a18;"></span>赛道琥珀橙</button>
+              <button type="button" class="cms-preset-chip" data-preset="deep-ocean"><span class="swatch" style="background:#38bdf8;"></span>静谧深海蓝</button>
+            </div>
+
+            <!-- 1. 品牌标识、主题色与公告栏 -->
+            <details open style="margin-bottom:12px; padding:12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.02);">
+              <summary style="cursor:pointer; font-weight:700; color:#fff; margin-bottom:10px;">1. 品牌标识、全局主题色与顶部公告栏</summary>
+              <div style="display:grid; grid-template-columns:1fr 140px; gap:10px;">
+                <div class="field">
+                  <label>品牌名称（同步页眉 Logo、页脚与网页标题）</label>
+                  <input type="text" id="cms-brand-name" placeholder="MODFORM">
+                </div>
+                <div class="field">
+                  <label>品牌主强调色</label>
+                  <input type="color" id="cms-accent-color" value="#d8ff00" style="height:38px; padding:2px 4px; cursor:pointer;">
+                </div>
+              </div>
+              <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; color:#cbd5e1; margin:6px 0 8px; cursor:pointer;">
+                <input type="checkbox" id="cms-show-announcement" checked> 显示顶部公告栏
+              </label>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="field">
+                  <label>顶部公告栏文案（中文）</label>
+                  <input type="text" id="cms-announcement" placeholder="全场满 ¥99 顺丰包邮 · 支持 7 天无理由退换保障">
+                </div>
+                <div class="field">
+                  <label>顶部公告栏文案（英文 EN）</label>
+                  <input type="text" id="cms-announcement-en" placeholder="Free SF Express shipping over ¥99 · 7-day hassle-free returns">
+                </div>
+              </div>
+              <div style="display:grid; grid-template-columns:120px 120px 1fr; gap:10px; margin-top:8px;">
+                <div class="field">
+                  <label>公告栏背景色</label>
+                  <input type="color" id="cms-announcement-bg" value="#d8ff00" style="height:36px; padding:2px 4px; cursor:pointer;">
+                </div>
+                <div class="field">
+                  <label>公告栏文字色</label>
+                  <input type="color" id="cms-announcement-color" value="#090a0c" style="height:36px; padding:2px 4px; cursor:pointer;">
+                </div>
+                <div class="field">
+                  <label>公告栏点击跳转链接（选填，如 #contact-section 或 https://...）</label>
+                  <input type="text" id="cms-announcement-link" placeholder="留空则仅展示文本">
+                </div>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06);">
+                <div class="field">
+                  <label>页眉品牌 Logo 图片（选填，留空则显示文字 Logo）</label>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <img id="cms-logo-preview" src="assets/favicon.svg" alt="Logo预览" style="width:36px; height:36px; object-fit:contain; border-radius:6px; background:#0d0f13; border:1px solid rgba(255,255,255,0.12);">
+                    <input type="hidden" id="cms-brand-logo-img" value="">
+                    <input type="file" id="cms-brand-logo-file" accept="image/*" style="display:none;">
+                    <button type="button" class="dark-outline-btn" style="padding:4px 10px; font-size:0.74rem;" onclick="document.getElementById('cms-brand-logo-file').click()">上传 Logo</button>
+                    <button type="button" class="dark-outline-btn" style="padding:4px 8px; font-size:0.72rem;" onclick="clearCmsBrandLogo()">清除</button>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>浏览器标签页图标（Favicon，默认 MODFORM Logo）</label>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <img id="cms-favicon-preview" src="assets/favicon.svg" alt="Favicon预览" style="width:36px; height:36px; object-fit:contain; border-radius:6px; background:#0d0f13; border:1px solid rgba(255,255,255,0.12);">
+                    <input type="hidden" id="cms-favicon-img" value="assets/favicon.svg">
+                    <input type="file" id="cms-favicon-file" accept="image/*" style="display:none;">
+                    <button type="button" class="dark-outline-btn" style="padding:4px 10px; font-size:0.74rem;" onclick="document.getElementById('cms-favicon-file').click()">更换图标</button>
+                    <button type="button" class="dark-outline-btn" style="padding:4px 8px; font-size:0.72rem;" onclick="resetCmsFavicon()">重置</button>
+                  </div>
+                </div>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:8px;">
+                <div class="field">
+                  <label>页面主背景色</label>
+                  <input type="color" id="cms-bg-color" value="#121418" style="height:36px; padding:2px 4px; cursor:pointer;">
+                </div>
+                <div class="field">
+                  <label>卡片容器底色</label>
+                  <input type="color" id="cms-surface-color" value="#171a20" style="height:36px; padding:2px 4px; cursor:pointer;">
+                </div>
+                <div class="field">
+                  <label>全站主按钮风格</label>
+                  <select id="cms-btn-style">
+                    <option value="rounded">现代微圆角（默认）</option>
+                    <option value="pill">全圆胶囊型</option>
+                    <option value="sharp">硬核直角型</option>
+                  </select>
+                </div>
+              </div>
+            </details>
+
+            <!-- 2. 首页首屏 Hero -->
+            <details open style="margin-bottom:12px; padding:12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.02);">
+              <summary style="cursor:pointer; font-weight:700; color:#fff; margin-bottom:10px;">2. 首页首屏（Hero）标语、按钮与主视觉大图</summary>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="field">
+                  <label>首屏主标语</label>
+                  <input type="text" id="cms-hero-title" placeholder="Your car. Styled your way.">
+                </div>
+                <div class="field">
+                  <label>首屏主按钮文案</label>
+                  <input type="text" id="cms-hero-btn-text" placeholder="我的爱车">
+                </div>
+              </div>
+              <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; color:#cbd5e1; margin:4px 0 8px; cursor:pointer;">
+                <input type="checkbox" id="cms-show-hero-garage" checked> 显示首屏「我的爱车」按钮
+              </label>
+              <div class="field">
+                <label>首屏右侧汽车展示大图（本地上传或输入路径）</label>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                  <img id="cms-hero-preview" src="assets/hero-auto-minimal.webp" alt="首屏大图预览" style="width:120px; height:68px; object-fit:cover; border-radius:6px; border:1px solid var(--border-dark);">
+                  <div style="flex:1; min-width:180px;">
+                    <input type="file" id="cms-hero-file" accept="image/*" style="display:none;">
+                    <button type="button" class="dark-outline-btn" id="cms-hero-upload-btn" style="padding:6px 12px; font-size:0.8rem; margin-bottom:6px;">+ 添加/更换首屏大图</button>
+                    <input type="text" id="cms-hero-bg1" placeholder="assets/hero-auto-minimal.webp" style="font-size:0.78rem;">
+                  </div>
+                </div>
+              </div>
+              <div style="display:grid; grid-template-columns:1.4fr 1fr 140px; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06);">
+                <div class="field">
+                  <label>首屏副标语（选填，显示在主标语下方）</label>
+                  <input type="text" id="cms-hero-subtitle" placeholder="例如：专车无损 · 极简车居美学好物">
+                </div>
+                <div class="field">
+                  <label>背景暗角遮罩浓度：<strong id="cms-hero-overlay-val" style="color:var(--neon-lime);">45%</strong></label>
+                  <input type="range" id="cms-hero-overlay" min="0" max="85" step="5" value="45" style="width:100%; accent-color:var(--neon-lime); margin-top:6px;">
+                </div>
+                <div class="field">
+                  <label>主视觉对齐方式</label>
+                  <select id="cms-hero-align" class="dark-select">
+                    <option value="center">居中对齐</option>
+                    <option value="left">左对齐（杂志风）</option>
+                  </select>
+                </div>
+              </div>
+            </details>
+
+            <!-- 3. 四大品类入口完全自定义 -->
+            <details open style="margin-bottom:12px; padding:12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.02);">
+              <summary style="cursor:pointer; font-weight:700; color:#fff; margin-bottom:10px;">3. 四大品类入口（名称 / 英文标 / 封面图 / 显隐）</summary>
+              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(195px, 1fr)); gap:12px;">
+                <div class="admin-card" style="padding:10px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <strong style="font-size:0.78rem; color:#d8ff00;">品类 1 · interior</strong>
+                    <label style="font-size:0.72rem; color:#cbd5e1; cursor:pointer;"><input type="checkbox" id="cms-cat-vis-interior" checked> 显示</label>
+                  </div>
+                  <img id="cms-cat-preview-interior" src="assets/interior.webp" alt="内饰美学封面" style="width:100%; height:90px; object-fit:cover; border-radius:8px; margin-bottom:6px;">
+                  <input type="hidden" id="cms-cat-img-interior" value="assets/interior.webp">
+                  <input type="file" id="cms-cat-file-interior" accept="image/*" style="display:none;">
+                  <input type="text" id="cms-cat-title-interior" value="内饰美学" placeholder="中文名称" style="margin-bottom:5px; font-size:0.78rem;">
+                  <input type="text" id="cms-cat-en-interior" value="INTERIOR" placeholder="英文标签" style="margin-bottom:6px; font-size:0.76rem;">
+                  <div style="display:flex; gap:6px;">
+                    <button type="button" class="neon-primary-btn" style="flex:1; padding:4px 8px; font-size:0.72rem;" onclick="document.getElementById('cms-cat-file-interior').click()">更换图片</button>
+                    <button type="button" class="dark-outline-btn" style="padding:4px 8px; font-size:0.72rem;" onclick="resetCmsCatCover('interior')">重置</button>
+                  </div>
+                </div>
+                <div class="admin-card" style="padding:10px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <strong style="font-size:0.78rem; color:#d8ff00;">品类 2 · exterior</strong>
+                    <label style="font-size:0.72rem; color:#cbd5e1; cursor:pointer;"><input type="checkbox" id="cms-cat-vis-exterior" checked> 显示</label>
+                  </div>
+                  <img id="cms-cat-preview-exterior" src="assets/exterior.webp" alt="外观升级封面" style="width:100%; height:90px; object-fit:cover; border-radius:8px; margin-bottom:6px;">
+                  <input type="hidden" id="cms-cat-img-exterior" value="assets/exterior.webp">
+                  <input type="file" id="cms-cat-file-exterior" accept="image/*" style="display:none;">
+                  <input type="text" id="cms-cat-title-exterior" value="外观升级" placeholder="中文名称" style="margin-bottom:5px; font-size:0.78rem;">
+                  <input type="text" id="cms-cat-en-exterior" value="EXTERIOR" placeholder="英文标签" style="margin-bottom:6px; font-size:0.76rem;">
+                  <div style="display:flex; gap:6px;">
+                    <button type="button" class="neon-primary-btn" style="flex:1; padding:4px 8px; font-size:0.72rem;" onclick="document.getElementById('cms-cat-file-exterior').click()">更换图片</button>
+                    <button type="button" class="dark-outline-btn" style="padding:4px 8px; font-size:0.72rem;" onclick="resetCmsCatCover('exterior')">重置</button>
+                  </div>
+                </div>
+                <div class="admin-card" style="padding:10px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <strong style="font-size:0.78rem; color:#d8ff00;">品类 3 · storage</strong>
+                    <label style="font-size:0.72rem; color:#cbd5e1; cursor:pointer;"><input type="checkbox" id="cms-cat-vis-storage" checked> 显示</label>
+                  </div>
+                  <img id="cms-cat-preview-storage" src="assets/storage.webp" alt="车载储物封面" style="width:100%; height:90px; object-fit:cover; border-radius:8px; margin-bottom:6px;">
+                  <input type="hidden" id="cms-cat-img-storage" value="assets/storage.webp">
+                  <input type="file" id="cms-cat-file-storage" accept="image/*" style="display:none;">
+                  <input type="text" id="cms-cat-title-storage" value="车载储物" placeholder="中文名称" style="margin-bottom:5px; font-size:0.78rem;">
+                  <input type="text" id="cms-cat-en-storage" value="STORAGE" placeholder="英文标签" style="margin-bottom:6px; font-size:0.76rem;">
+                  <div style="display:flex; gap:6px;">
+                    <button type="button" class="neon-primary-btn" style="flex:1; padding:4px 8px; font-size:0.72rem;" onclick="document.getElementById('cms-cat-file-storage').click()">更换图片</button>
+                    <button type="button" class="dark-outline-btn" style="padding:4px 8px; font-size:0.72rem;" onclick="resetCmsCatCover('storage')">重置</button>
+                  </div>
+                </div>
+                <div class="admin-card" style="padding:10px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <strong style="font-size:0.78rem; color:#d8ff00;">品类 4 · scent</strong>
+                    <label style="font-size:0.72rem; color:#cbd5e1; cursor:pointer;"><input type="checkbox" id="cms-cat-vis-scent" checked> 显示</label>
+                  </div>
+                  <img id="cms-cat-preview-scent" src="assets/fragrance.webp" alt="车载香薰封面" style="width:100%; height:90px; object-fit:cover; border-radius:8px; margin-bottom:6px;">
+                  <input type="hidden" id="cms-cat-img-scent" value="assets/fragrance.webp">
+                  <input type="file" id="cms-cat-file-scent" accept="image/*" style="display:none;">
+                  <input type="text" id="cms-cat-title-scent" value="车载香薰" placeholder="中文名称" style="margin-bottom:5px; font-size:0.78rem;">
+                  <input type="text" id="cms-cat-en-scent" value="FRAGRANCE" placeholder="英文标签" style="margin-bottom:6px; font-size:0.76rem;">
+                  <div style="display:flex; gap:6px;">
+                    <button type="button" class="neon-primary-btn" style="flex:1; padding:4px 8px; font-size:0.72rem;" onclick="document.getElementById('cms-cat-file-scent').click()">更换图片</button>
+                    <button type="button" class="dark-outline-btn" style="padding:4px 8px; font-size:0.72rem;" onclick="resetCmsCatCover('scent')">重置</button>
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <!-- 4. 新品首推板块与邮件订阅横幅 -->
+            <details style="margin-bottom:12px; padding:12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.02);">
+              <summary style="cursor:pointer; font-weight:700; color:#fff; margin-bottom:10px;">4. 首页新品板块与邮件订阅横幅</summary>
+              <div style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:8px;">
+                <label style="font-size:0.8rem; color:#cbd5e1; cursor:pointer;"><input type="checkbox" id="cms-show-new-arrivals" checked> 显示首页新品首推栏</label>
+                <label style="font-size:0.8rem; color:#cbd5e1; cursor:pointer;"><input type="checkbox" id="cms-show-newsletter" checked> 显示荧光绿邮件订阅横幅</label>
+              </div>
+              <div class="field">
+                <label>新品板块自定义标题</label>
+                <input type="text" id="cms-new-arrivals-title" placeholder="新品首推">
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="field">
+                  <label>邮件订阅主标题</label>
+                  <input type="text" id="cms-newsletter-heading" placeholder="订阅我们的邮件 · SUBSCRIBE TO OUR EMAILS">
+                </div>
+                <div class="field">
+                  <label>邮件订阅副说明</label>
+                  <input type="text" id="cms-newsletter-sub" placeholder="第一时间获取 MODFORM 限量车品套装与车主专属优惠。">
+                </div>
+              </div>
+            </details>
+
+            <!-- 5. Contact 联系方式、运费门槛与页脚政策弹窗 -->
+            <details style="margin-bottom:14px; padding:12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.02);">
+              <summary style="cursor:pointer; font-weight:700; color:#fff; margin-bottom:10px;">5. Contact 联系方式、运费规则与页脚政策</summary>
+              <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; color:#cbd5e1; margin-bottom:8px; cursor:pointer;">
+                <input type="checkbox" id="cms-show-contact" checked> 显示首页 Contact 联系我们板块
+              </label>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="field">
+                  <label>Contact 板块标题</label>
+                  <input type="text" id="cms-contact-title" placeholder="Contact · 联系我们">
+                </div>
+                <div class="field">
+                  <label>页脚版权文案</label>
+                  <input type="text" id="cms-footer-copyright" placeholder="© 2026 MODFORM">
+                </div>
+                <div class="field">
+                  <label>ICP 备案号（选填，公网上线后填写并同步显示在页脚）</label>
+                  <input type="text" id="cms-footer-icp" placeholder="例如：沪ICP备XXXXXXXX号-1">
+                </div>
+                <div class="field">
+                  <label>备案查询跳转链接</label>
+                  <input type="url" id="cms-footer-icp-url" placeholder="https://beian.miit.gov.cn/">
+                </div>
+              </div>
+              <div class="field">
+                <label>Contact 板块简介</label>
+                <input type="text" id="cms-contact-desc" placeholder="车型适配核验、批量定制采购或售后安装协助，专属车品顾问为您提供一对一响应。">
+              </div>
+              <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
+                <div class="field">
+                  <label>官方邮箱</label>
+                  <input type="email" id="cms-contact-email" placeholder="support@modform.auto">
+                </div>
+                <div class="field">
+                  <label>官方客服微信</label>
+                  <input type="text" id="cms-contact-wechat" placeholder="MODFORM_Studio">
+                </div>
+                <div class="field">
+                  <label>服务时间</label>
+                  <input type="text" id="cms-contact-hours" placeholder="每日 09:30 – 22:00">
+                </div>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="field">
+                  <label>全场顺丰包邮门槛 (¥)</label>
+                  <input type="number" id="cms-free-shipping" min="0" value="99">
+                </div>
+                <div class="field">
+                  <label>极速达加急运费 (¥)</label>
+                  <input type="number" id="cms-express-fee" min="0" value="15">
+                </div>
+              </div>
+              <div class="field">
+                <label>页脚「车品顾问客服」弹窗正文</label>
+                <textarea id="cms-policy-support" rows="2" placeholder="选品与车型适配咨询请联系官方微信或发送邮件，每日 09:30-22:00 实时响应。"></textarea>
+              </div>
+              <div class="field">
+                <label>页脚「退换货与安装保障」弹窗正文</label>
+                <textarea id="cms-policy-warranty" rows="2" placeholder="支持 7 天无理由退换货、运输破损免费补发，并提供一对一无损安装指导。"></textarea>
+              </div>
+              <div class="field">
+                <label>页脚「用户服务协议」自定义正文（留空则使用内置标准协议）</label>
+                <textarea id="cms-policy-terms" rows="3" placeholder="可在此自定义《用户服务协议》条款，保存后实时同步至买家端页脚与结算页弹窗"></textarea>
+              </div>
+              <div class="field">
+                <label>页脚「隐私政策」自定义正文（留空则使用内置标准隐私政策）</label>
+                <textarea id="cms-policy-privacy" rows="3" placeholder="可在此自定义《隐私政策》条款，保存后实时同步至买家端页脚与结算页弹窗"></textarea>
+              </div>
+            </details>
+
+            <!-- 6. 布局引擎：首页板块排序 + 网格列数 + 圆角与比例 -->
+            <details open style="margin-bottom:12px; padding:12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.02);">
+              <summary style="cursor:pointer; font-weight:700; color:#d8ff00; margin-bottom:10px;">6. 页面布局引擎（首页板块拖拽排序 / 列数 / 圆角 / 图片比例 / 字体）</summary>
+              <div class="field" style="margin-bottom:12px;">
+                <label>首页板块上下展示顺序（点击 ↑ / ↓ 实时调整买家端首页结构）</label>
+                <div id="cms-section-order-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+                <input type="hidden" id="cms-section-order" value="hero,collections,new-arrivals,contact,newsletter">
+              </div>
+              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px;">
+                <div class="field">
+                  <label>首页品类入口布局</label>
+                  <select id="cms-cat-layout-mode">
+                    <option value="staggered">同行错列 4 列（默认）</option>
+                    <option value="grid-4">齐平标准 4 列</option>
+                    <option value="grid-2">大画幅 2×2 展陈</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>商品展示页列数</label>
+                  <select id="cms-catalog-cols">
+                    <option value="3">建筑画廊 3 列（默认）</option>
+                    <option value="4">高密度 4 列</option>
+                    <option value="2">杂志大画幅 2 列</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>商品卡片圆角风格</label>
+                  <select id="cms-card-radius">
+                    <option value="default">现代微圆角 (10px)</option>
+                    <option value="sharp">硬核直角 (4px)</option>
+                    <option value="rounded">柔和圆润 (18px)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>商品图展示比例</label>
+                  <select id="cms-card-aspect">
+                    <option value="16/11">宽幅画廊 16:11（默认）</option>
+                    <option value="1/1">经典正方形 1:1</option>
+                    <option value="4/5">竖版画报 4:5</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>全站字体气质</label>
+                  <select id="cms-font-style">
+                    <option value="modern">现代无衬线（默认）</option>
+                    <option value="editorial">杂志衬线标题混搭</option>
+                    <option value="mono">机能等宽数字风</option>
+                  </select>
+                </div>
+              </div>
+            </details>
+
+            <!-- 7. 自定义顶部导航菜单 (Navigation) -->
+            <details style="margin-bottom:14px; padding:12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.02);">
+              <summary style="cursor:pointer; font-weight:700; color:#fff; margin-bottom:10px;">7. 顶部导航自定义菜单（支持站内图文页 / 板块跳转 / 外部链接）</summary>
+              <div id="cms-custom-nav-list" style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;"></div>
+              <button type="button" class="dark-outline-btn" id="cms-add-nav-link-btn" style="padding:5px 12px; font-size:0.78rem;">+ 添加导航菜单项</button>
+            </details>
+
+            <!-- 8. 自定义推广内容板块增删（Add Section） -->
+            <details style="margin-bottom:12px; padding:12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.02);">
+              <summary style="cursor:pointer; font-weight:700; color:#d8ff00; margin-bottom:10px;">8. 首页自定义内容板块（活动横幅 / 品牌故事 / 图文推荐）</summary>
+              <div id="cms-custom-blocks-list" style="display:flex; flex-direction:column; gap:10px; margin-bottom:10px;"></div>
+              <button type="button" class="dark-outline-btn" id="cms-add-custom-block-btn" style="padding:5px 12px; font-size:0.78rem;">+ 新增自定义内容板块</button>
+            </details>
+
+            <!-- 9. SEO 元信息与高级自定义 CSS -->
+            <details style="margin-bottom:14px; padding:12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.02);">
+              <summary style="cursor:pointer; font-weight:700; color:#fff; margin-bottom:10px;">9. 搜索引擎 SEO 设置与高级自定义 CSS</summary>
+              <div class="field">
+                <label>浏览器网页标题 (SEO Title)</label>
+                <input type="text" id="cms-seo-title" placeholder="MODFORM · Your car. Styled your way.">
+              </div>
+              <div class="field">
+                <label>搜索引擎简介 (Meta Description)</label>
+                <input type="text" id="cms-seo-desc" placeholder="MODFORM 汽车用品与座舱美学独立站...">
+              </div>
+              <div class="field">
+                <label>高级自定义 CSS（直接覆盖前台页面样式）</label>
+                <textarea id="cms-custom-css" rows="3" placeholder="/* 例如：.ride-hero-slogan { letter-spacing: -0.04em; } */" style="font-family:monospace; font-size:0.78rem;"></textarea>
+              </div>
+            </details>
+
+            <!-- 8. 上线安全与全站健康度自检仪 -->
+            <div style="margin-bottom:14px; padding:14px; border:1px solid rgba(216,255,0,0.28); border-radius:12px; background:rgba(216,255,0,0.04);">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                <strong style="font-size:0.88rem; color:#d8ff00;">🛡️ 店铺上线安全与同步自检仪</strong>
+                <button type="button" class="dark-outline-btn" id="run-health-check-btn" style="padding:4px 10px; font-size:0.74rem;">立即重新体检</button>
+              </div>
+              <div id="admin-health-check-list" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:8px; font-size:0.78rem;"></div>
+            </div>
+
+            <div class="cms-sticky-bar">
+              <span class="cms-sticky-hint">保存后将立即持久化到 SQLite 并实时同步至买家端</span>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <button type="button" class="dark-outline-btn" id="cms-sticky-preview-btn" style="padding:8px 14px; font-size:0.82rem;">📱 预览效果</button>
+                <button type="submit" class="neon-primary-btn" style="padding:9px 22px; font-size:0.86rem;">💾 发布并同步买家端</button>
+              </div>
+            </div>
+          </form>
+
+          <div class="admin-form-box">
+            <h4 style="margin-bottom:12px; color:var(--neon-lime);">💳 收款码、支付网关 Webhook 与数据库备份</h4>
+            <div class="field" style="margin-bottom:10px;">
+              <label style="display:block; font-size:0.82rem; margin-bottom:4px;">上传微信收款码：</label>
+              <input type="file" id="setting-wechat-qr" accept="image/*" style="color:#fff; font-size:0.8rem;">
+            </div>
+            <div class="field" style="margin-bottom:10px;">
+              <label style="display:block; font-size:0.82rem; margin-bottom:4px;">上传支付宝收款码：</label>
+              <input type="file" id="setting-alipay-qr" accept="image/*" style="color:#fff; font-size:0.8rem;">
+            </div>
+            <div class="field" style="margin-bottom:12px;">
+              <label style="display:block; font-size:0.82rem; margin-bottom:4px;">在线收银台链接 (Stripe / 聚合收银台 URL)：</label>
+              <div style="display:flex; gap:8px;">
+                <input type="url" id="setting-stripe-link" placeholder="https://buy.stripe.com/..." style="flex:1; padding:6px 10px; background:var(--bg-card); border:1px solid var(--border-dark); border-radius:4px; color:#fff; font-size:0.82rem;">
+                <button type="button" class="dark-outline-btn" id="save-pay-link-btn" style="padding:6px 12px; font-size:0.8rem;">保存</button>
+              </div>
+            </div>
+
+            <div style="border-top:1px solid var(--border-dark); padding-top:14px; margin-bottom:14px;">
+                          <div style="margin-top:18px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.08);">
+              <h4 style="font-size:0.9rem; color:var(--neon-lime); margin-bottom:8px;">🔐 绑定密码找回邮箱与手机号</h4>
+              <p style="font-size:0.76rem; color:var(--text-muted); margin:0 0 10px;">绑定后，若忘记商家后台密码，可在登录页直接通过邮箱或手机号验证码找回。</p>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                <input type="email" id="admin-bind-email" placeholder="管理员邮箱（如 admin@modform.cn）" style="font-size:0.8rem;">
+                <input type="tel" id="admin-bind-phone" placeholder="管理员手机号（如 138xxxx8888）" style="font-size:0.8rem;">
+              </div>
+              <button type="button" class="dark-outline-btn" id="save-admin-bind-contact-btn" style="padding:6px 14px; font-size:0.78rem; color:var(--neon-lime); border-color:rgba(216,255,0,0.4);">保存找回邮箱 / 手机号</button>
+            </div>
+
+            <h4 style="font-size:0.9rem; color:var(--neon-lime); margin-bottom:8px;">💾 全站数据库一键备份与恢复 (.json)</h4>
+              <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:10px;">导出包含所有自建商品、模板修改、库存、订单、客户与评价的完整 JSON 数据库快照。</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="button" class="neon-primary-btn" id="backup-db-btn" style="padding:7px 14px; font-size:0.8rem;">💾 导出全站数据备份 (.json)</button>
+                <input type="file" id="restore-db-input" accept=".json,application/json" style="display:none;">
+                <button type="button" class="dark-outline-btn" id="restore-db-btn" style="padding:7px 14px; font-size:0.8rem;">📂 导入并恢复备份</button>
+              </div>
+            </div>
+
+            <form id="admin-pwd-form" class="clean-form" style="border-top:1px solid var(--border-dark); padding-top:14px;">
+              <div class="field">
+                <label>修改商家后台登录密码（服务端 PBKDF2 加密保存）</label>
+                <input type="password" id="new-admin-pwd" placeholder="输入新的管理员密码（至少8位）" autocomplete="new-password" minlength="8" required>
+              </div>
+              <button type="submit" class="dark-outline-btn">更新后台密码</button>
+            </form>
+
+            <div style="border-top:1px solid var(--border-dark); padding-top:14px; margin-top:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h4 style="font-size:0.9rem; color:var(--neon-lime); margin:0;">🛡️ 后台操作审计日志</h4>
+                <button type="button" class="dark-outline-btn" id="clear-audit-logs-btn" style="padding:3px 9px; font-size:0.72rem;">清空日志</button>
+              </div>
+              <div id="admin-audit-logs-list" style="max-height:200px; overflow-y:auto; font-size:0.76rem;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 全字段编辑商品与多SKU库存弹窗 -->
+  <div class="modal-backdrop" id="edit-product-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-md" style="max-width:740px; max-height:92vh; overflow-y:auto;">
+      <button type="button" class="modal-close" id="close-edit-prod-modal">✕</button>
+      <h3 class="modal-title">全字段编辑商品、多SKU价格库存与精准适配</h3>
+      <form id="edit-product-form" class="clean-form">
+        <input type="hidden" id="edit-prod-id">
+
+        <div class="form-row-2">
+          <div class="field">
+            <label>商品名称 *</label>
+            <input type="text" id="edit-prod-name" required>
+            <input type="text" id="edit-prod-name-en" placeholder="English Title (可选，切换 EN 时显示)" style="margin-top:6px;">
+            <input type="text" id="edit-prod-sub-en" placeholder="English Subtitle (可选，切换 EN 时显示)" style="margin-top:6px;">
+          </div>
+          <div class="field">
+            <label>所属升级/用品类目 *</label>
+            <select id="edit-prod-cat" class="dark-select">
+              <option value="interior">内饰美学 (INTERIOR)</option>
+              <option value="exterior">外观升级 (EXTERIOR)</option>
+              <option value="storage">车载储物 (STORAGE)</option>
+              <option value="scent">车载香薰 (FRAGRANCE)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="field">
+            <label>基础销售价格 (¥) *</label>
+            <input type="number" step="0.1" id="edit-prod-price" min="0.1" required>
+          </div>
+          <div class="field">
+            <label>当前总库存 (件) *</label>
+            <input type="number" id="edit-prod-stock" min="0" required>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="field">
+            <label>上下架状态 *</label>
+            <select id="edit-prod-onsale" class="dark-select">
+              <option value="true">🟢 正常上架销售（前台可见）</option>
+              <option value="false">⚪ 仓库下架隐藏（前台不显示）</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>基础销量修正（默认0，叠加真实订单销量）</label>
+            <input type="number" id="edit-prod-base-sales" min="0" value="0">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="field">
+            <label>适配车型大类 *</label>
+            <select id="edit-prod-fit" class="dark-select">
+              <option value="universal">全车型通用款</option>
+              <option value="sedan">轿车 / 轿跑升级</option>
+              <option value="suv">SUV / 越野收纳</option>
+              <option value="ev">新能源汽车专属</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>适配具体说明 *</label>
+            <input type="text" id="edit-prod-fit-text" required>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="field">
+            <label>精准适配车系关键词（如 `universal` 或 `honda, 思域, 型格`）</label>
+            <input type="text" id="edit-prod-fit-brands" placeholder="universal">
+          </div>
+          <div class="field">
+            <label>适用车型年份范围（如 `2018-2026`）</label>
+            <input type="text" id="edit-prod-fit-years" placeholder="2015-2026">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>商品展示图片管理（可添加多张图片、一键设为主图或删除）</label>
+          <div class="admin-multi-img-box">
+            <input type="file" id="edit-multi-img-input" accept="image/*" multiple style="display:none;">
+            <div id="edit-images-grid" class="admin-images-grid"></div>
+            <button type="button" class="admin-add-img-tile" id="edit-add-images-btn">
+              <span>+</span>
+              <small>添加图片</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="margin-bottom:0;">多规格 SKU 独立定价与库存 *</label>
+            <button type="button" class="dark-outline-btn" id="edit-add-sku-row-btn" style="padding:3px 9px; font-size:0.74rem; color:var(--neon-lime);">+ 添加规格行</button>
+          </div>
+          <div id="edit-sku-editor" class="sku-table-editor"></div>
+          <input type="hidden" id="edit-prod-variants">
+        </div>
+
+        <div class="form-row-2">
+          <div class="field">
+            <label>角标标签</label>
+            <input type="text" id="edit-prod-badge" placeholder="如：口碑热销 / 专车定制">
+          </div>
+          <div class="field">
+            <label>核心卖点标签（逗号隔开）</label>
+            <input type="text" id="edit-prod-specs" placeholder="如：Alcantara绒面, 吸汗防滑, 透气打孔">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>一句话卖点副标题 *</label>
+          <input type="text" id="edit-prod-sub" required>
+        </div>
+
+        <div class="form-row-2">
+          <div class="field">
+            <label>主体材质说明</label>
+            <input type="text" id="edit-prod-material">
+          </div>
+          <div class="field">
+            <label>无损安装说明</label>
+            <input type="text" id="edit-prod-install">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="field">
+            <label>DIY 安装难度与耗时（选填，留空按类目自动显示）</label>
+            <div style="display:flex; gap:6px;">
+              <input type="text" id="edit-prod-diy-diff" placeholder="如：★☆☆☆☆ 新手无损" style="flex:1;">
+              <input type="text" id="edit-prod-diy-time" placeholder="如：约 5 分钟" style="flex:1;">
+            </div>
+          </div>
+          <div class="field">
+            <label>包装清单（选填，逗号隔开，如：主体×1, 助粘剂×1, 撬棒×1）</label>
+            <input type="text" id="edit-prod-box-contents" placeholder="留空则按商品类目自动生成清单">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="field">
+            <label>安装视频链接（MP4 或视频网址，选填）</label>
+            <input type="text" id="edit-prod-video-url" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label>1688 货源采购链接（仅商家后台可见）</label>
+            <input type="url" id="edit-prod-source-url" placeholder="https://detail.1688.com/offer/...">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>外部跳转购买链接（选填，留空则站内结账）</label>
+          <input type="url" id="edit-prod-redirect-url" placeholder="https://...">
+        </div>
+
+        <button type="submit" class="neon-primary-btn full-width">保存全部商品信息与多SKU库存</button>
+      </form>
+    </div>
+  </div>
+
+
+  <footer style="max-width:1280px; margin:24px auto 32px; padding:14px 20px; border-top:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:0.78rem; color:#8e95a2;">
+    <span>MODFORM 商家管理后台 · 合规与数据保护中心</span>
+    <div style="display:flex; gap:14px;">
+      <button type="button" id="admin-view-terms-btn" style="background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:0.78rem;text-decoration:underline;">查看《用户服务协议》</button>
+      <button type="button" id="admin-view-privacy-btn" style="background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:0.78rem;text-decoration:underline;">查看《隐私政策》</button>
+    </div>
+  </footer>
+
+  <div class="modal-backdrop" id="admin-legal-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-lg">
+      <button type="button" class="modal-close" id="close-admin-legal-modal" aria-label="关闭协议预览">✕</button>
+      <h3 class="modal-title" id="admin-legal-modal-title">平台协议预览</h3>
+      <div id="admin-legal-modal-body" style="max-height:60vh;overflow-y:auto;font-size:0.84rem;line-height:1.75;color:#cbd5e1;white-space:pre-line;"></div>
+    </div>
+  </div>
+
+
+  <!-- 实时桌面/移动端分屏预览弹窗 -->
+  <div class="modal-backdrop" id="admin-live-preview-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-xl" style="max-width:1180px; width:95vw; height:88vh; display:flex; flex-direction:column;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
+        <h3 class="modal-title" style="margin:0;">实时前台预览（保存配置后自动生效）</h3>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button type="button" class="dark-outline-btn" id="preview-desktop-btn" style="padding:4px 10px; font-size:0.76rem;">桌面端</button>
+          <button type="button" class="dark-outline-btn" id="preview-mobile-btn" style="padding:4px 10px; font-size:0.76rem;">手机端 390px</button>
+          <button type="button" class="dark-outline-btn" id="preview-reload-btn" style="padding:4px 10px; font-size:0.76rem; color:#d8ff00;">刷新预览</button>
+          <button type="button" class="modal-close" id="close-live-preview-modal" style="position:static;" aria-label="关闭预览">✕</button>
+        </div>
+      </div>
+      <div style="flex:1; background:#090a0c; border-radius:10px; overflow:hidden; display:flex; justify-content:center; border:1px solid rgba(255,255,255,0.12);">
+        <iframe id="admin-live-preview-iframe" src="about:blank" title="MODFORM 买家端实时预览" style="width:100%; height:100%; border:none; transition:width 0.25s ease;"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js?v=20261120v4"></script>
+  <script src="admin.js?v=20261120v4"></script>
+
+  <!-- 忘记密码：通过绑定邮箱 / 手机号验证码找回（支持恢复密钥备用） -->
+  <div class="modal-backdrop" id="admin-forgot-modal" role="dialog" aria-modal="true">
+    <div class="modal-card" style="max-width:460px;">
+      <button type="button" class="modal-close" id="close-admin-forgot-modal" aria-label="关闭忘记密码弹窗">✕</button>
+      <h3 class="modal-title" style="margin-bottom:6px;">找回管理员密码</h3>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin:0 0 14px; line-height:1.6;">
+        输入您绑定的<strong>管理员邮箱或手机号</strong>获取 6 位验证码即可重设密码。
+      </p>
+      <form id="admin-forgot-code-form" class="clean-form">
+        <div class="field">
+          <label for="forgot-contact-input">绑定的邮箱或手机号</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="forgot-contact-input" placeholder="例如：your@email.com 或 138xxxx8888" style="flex:1;" required>
+            <button type="button" class="dark-outline-btn" id="send-forgot-code-btn" style="white-space:nowrap; padding:0 12px; font-size:0.8rem; color:var(--neon-lime); border-color:rgba(216,255,0,0.4);">发送验证码</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="forgot-code-input">6 位验证码</label>
+          <input type="text" id="forgot-code-input" placeholder="输入收到的 6 位数字验证码" maxlength="6" required>
+        </div>
+        <div class="field">
+          <label for="forgot-code-new-pwd">新管理员密码（至少 8 位）</label>
+          <input type="password" id="forgot-code-new-pwd" placeholder="请输入 8 位以上新强密码" minlength="8" required>
+        </div>
+        <div class="field">
+          <label for="forgot-code-new-pwd2">确认新密码</label>
+          <input type="password" id="forgot-code-new-pwd2" placeholder="再次输入新密码" minlength="8" required>
+        </div>
+        <button type="submit" class="neon-primary-btn full-width">验证验证码并重置密码</button>
+      </form>
+
+      <details style="margin-top:14px; padding:10px 12px; border-radius:8px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);">
+        <summary style="cursor:pointer; font-size:0.78rem; color:#94a3b8; font-weight:600;">尚未绑定邮箱/手机？使用 .env 安全恢复密钥重置</summary>
+        <form id="admin-forgot-form" class="clean-form" style="margin-top:10px;">
+          <div class="field">
+            <label for="forgot-recovery-key">安全恢复密钥 (ADMIN_RECOVERY_KEY)</label>
+            <input type="password" id="forgot-recovery-key" placeholder="输入 .env 中的恢复密钥" required>
+          </div>
+          <div class="field">
+            <label for="forgot-new-pwd">新管理员密码（至少 8 位）</label>
+            <input type="password" id="forgot-new-pwd" placeholder="请输入 8 位以上新强密码" minlength="8" required>
+          </div>
+          <div class="field">
+            <label for="forgot-new-pwd2">确认新密码</label>
+            <input type="password" id="forgot-new-pwd2" placeholder="再次输入新密码" minlength="8" required>
+          </div>
+          <button type="submit" class="dark-outline-btn full-width" style="color:var(--neon-lime); border-color:rgba(216,255,0,0.4);">通过恢复密钥重置</button>
+        </form>
+      </details>
+    </div>
+  </div>
+
+  <!-- 商家端站内确认/输入弹窗（替代浏览器原生 confirm / prompt） -->
+  <div class="modal-backdrop" id="admin-dialog-modal" role="dialog" aria-modal="true">
+    <div class="modal-card" style="max-width:440px;">
+      <h3 class="modal-title" id="admin-dialog-title" style="margin-bottom:8px;">操作确认</h3>
+      <p id="admin-dialog-msg" style="font-size:0.86rem; color:#cbd5e1; line-height:1.65; margin:0 0 14px; white-space:pre-line;"></p>
+      <input type="text" id="admin-dialog-input" style="display:none; width:100%; margin-bottom:14px;" placeholder="请输入内容">
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" class="dark-outline-btn" id="admin-dialog-cancel">取消</button>
+        <button type="button" class="neon-primary-btn" id="admin-dialog-ok">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="admin-toast" class="admin-toast" role="status" aria-live="polite"></div>
+</body>
+</html>

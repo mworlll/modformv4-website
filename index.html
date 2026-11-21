@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="MODFORM 甄选车载香薰、车内储物收纳、内饰美学与外观装饰好物，支持精准车型适配筛选、多SKU独立定价与7天售后保障。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="MODFORM · Your car. Styled your way.">
+  <meta property="og:description" content="甄选车载香薰、车内储物收纳、内饰美学与外观装饰好物，精准车型适配。">
+  <meta property="og:image" content="assets/hero-auto-minimal.webp">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#090a0c">
+  <link id="site-favicon" rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <title>MODFORM · Your car. Styled your way.</title>
+  <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="style.css?v=20261120v4">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+  <!-- 1. 顶部荧光绿公告条  -->
+  <div class="ride-announcement-bar">
+    <span id="site-announcement-text">全场满 ¥99 顺丰包邮 · 支持 7 天无理由退换保障</span>
+  </div>
+
+  <!-- 2. MODFORM 居中品牌导航栏 -->
+  <header class="ride-header" id="main-header">
+    <div class="ride-header-top">
+      <div class="ride-header-spacer" aria-hidden="true"></div>
+
+      <a href="#" class="modform-brand-logo" id="logo-home-btn" aria-label="MODFORM 首页">
+        <svg class="modform-wordmark" viewBox="0 0 360 44" width="176" height="22" role="img" aria-label="MODFORM">
+          <text x="180" y="34" text-anchor="middle" fill="#ffffff" font-family="'Space Grotesk', 'Noto Sans SC', sans-serif" font-size="36" font-weight="700" letter-spacing="10">MODFORM</text>
+        </svg>
+      </a>
+
+      <div class="ride-icon-actions">
+        <button type="button" class="icon-action-btn" id="search-toggle-btn" title="搜索商品" aria-label="搜索商品" aria-expanded="false" aria-controls="floating-search-bar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+        <button type="button" class="icon-action-btn" id="orders-nav-btn" title="我的订单" aria-label="我的订单">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+          <span class="mini-count" id="order-count">0</span>
+        </button>
+        <button type="button" class="icon-action-btn" id="wishlist-nav-btn" title="我的收藏" aria-label="我的收藏">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="mini-count" id="wishlist-count">0</span>
+        </button>
+        <button type="button" class="icon-action-btn" id="user-nav-btn" title="登录 / 车主中心" aria-label="登录或打开车主中心">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="user-short-name" style="font-size:0.78rem;"></span>
+        </button>
+        <button type="button" class="lang-toggle-btn" id="lang-toggle-btn" title="切换中英文 / Switch Language" aria-label="切换中英文">EN</button>
+        <button type="button" class="icon-action-btn cart-pill-trigger" id="cart-btn" title="购物袋" aria-label="打开购物袋" aria-expanded="false" aria-controls="cart-drawer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="mini-count accent-badge" id="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+
+    <nav class="ride-center-nav" aria-label="主导航">
+      <button type="button" class="ride-nav-link is-active" id="nav-home-link">首页</button>
+      <div class="nav-dropdown-wrap" id="nav-catalog-dropdown">
+        <button type="button" class="ride-nav-link nav-dropdown-trigger" id="nav-shop-all" aria-expanded="false" aria-haspopup="true">车品目录 <span class="nav-caret" aria-hidden="true">▾</span></button>
+        <div class="nav-catalog-menu" id="nav-catalog-menu" role="menu" aria-label="车品品类导航">
+          <button type="button" class="nav-catalog-item" data-category="all" role="menuitem"><span>全部商品</span><small id="nav-count-all">0</small></button>
+          <button type="button" class="nav-catalog-item" data-category="interior" role="menuitem"><span>内饰美学</span><small id="nav-count-interior">0</small></button>
+          <button type="button" class="nav-catalog-item" data-category="exterior" role="menuitem"><span>外观升级</span><small id="nav-count-exterior">0</small></button>
+          <button type="button" class="nav-catalog-item" data-category="storage" role="menuitem"><span>车载储物</span><small id="nav-count-storage">0</small></button>
+          <button type="button" class="nav-catalog-item" data-category="scent" role="menuitem"><span>车载香薰</span><small id="nav-count-scent">0</small></button>
+        </div>
+      </div>
+      <button type="button" class="ride-nav-link" id="nav-contact-link">Contact</button>
+    </nav>
+  </header>
+
+  <!-- 悬浮搜索框 -->
+  <div class="floating-search-bar" id="floating-search-bar" style="display: none;">
+    <div class="search-bar-inner" role="search">
+      <label class="sr-only" for="search-input">搜索汽车用品</label>
+      <input type="search" id="search-input" placeholder="搜索翻毛皮、碳纤维、尾翼、储物盒、香薰或适用车型…" autocomplete="off">
+      <button type="button" id="close-search-btn" aria-label="关闭搜索">✕</button>
+    </div>
+  </div>
+
+  <main id="main-content">
+  <!-- 视图 A：暗黑极简主页 -->
+  <div id="home-view">
+    <div class="new-drop-top-jump-wrap" id="new-drop-top-jump-wrap" style="display: none;">
+      <button type="button" class="new-drop-jump-btn" id="jump-new-arrivals-btn" aria-label="点击跳转到新品首推栏">
+        <span class="jump-dot"></span>
+        <span>新品首推 NEW DROP</span>
+        <span class="jump-arrow-anim" aria-hidden="true">↓</span>
+      </button>
+    </div>
+    <section class="ride-split-hero" id="minimal-hero">
+      <div class="section-container ride-split-grid">
+        <div class="ride-hero-copy">
+          <h1 class="ride-hero-slogan" id="hero-title">Your car.<br>Styled your<br>way.</h1>
+          <p class="ride-hero-sub" id="hero-subtitle" style="display:none;"></p>
+          <div class="ride-hero-actions">
+            <button type="button" class="neon-primary-btn" id="hero-garage-btn"><span id="garage-btn-text">我的爱车</span></button>
+          </div>
+        </div>
+        <div class="ride-hero-visual">
+          <img src="assets/hero-auto-minimal.webp" alt="MODFORM 暗黑美学汽车展示" width="1376" height="768" fetchpriority="high" decoding="async">
+        </div>
+      </div>
+    </section>
+
+    <!-- 四大产品四类独立入口 -->
+    <section class="collection-list-section ride-collections-sec" id="collection-section">
+      <div class="section-container">
+        <div class="ride-collection-top-bar">
+          <button type="button" class="section-text-link" id="featured-shop-all">浏览全部车品 <span aria-hidden="true">→</span></button>
+        </div>
+
+        <div class="four-collections-grid">
+          <article class="collection-card ride-cat-card" data-category="interior" role="link" tabindex="0" aria-label="进入内饰美学专区">
+            <div class="collection-poster">
+              <img id="home-cat-img-interior" src="assets/interior.webp" alt="内饰美学" loading="lazy" decoding="async" width="1000" height="667">
+              <div class="poster-gradient"></div>
+              <span class="ride-cat-pill">INTERIOR</span>
+            </div>
+            <div class="ride-cat-foot">
+              <div>
+                <h3 class="collection-card-title">内饰美学</h3>
+                <span class="collection-card-meta"><span id="home-count-interior">10</span> 款商品</span>
+              </div>
+              <span class="ride-cat-arrow">→</span>
+            </div>
+          </article>
+
+          <article class="collection-card ride-cat-card" data-category="exterior" role="link" tabindex="0" aria-label="进入外观升级专区">
+            <div class="collection-poster">
+              <img id="home-cat-img-exterior" src="assets/exterior.webp" alt="外观升级" loading="lazy" decoding="async" width="1000" height="667">
+              <div class="poster-gradient"></div>
+              <span class="ride-cat-pill">EXTERIOR</span>
+            </div>
+            <div class="ride-cat-foot">
+              <div>
+                <h3 class="collection-card-title">外观升级</h3>
+                <span class="collection-card-meta"><span id="home-count-exterior">10</span> 款商品</span>
+              </div>
+              <span class="ride-cat-arrow">→</span>
+            </div>
+          </article>
+
+          <article class="collection-card ride-cat-card" data-category="storage" role="link" tabindex="0" aria-label="进入车载储物专区">
+            <div class="collection-poster">
+              <img id="home-cat-img-storage" src="assets/storage.webp" alt="车载储物" loading="lazy" decoding="async" width="800" height="800">
+              <div class="poster-gradient"></div>
+              <span class="ride-cat-pill">STORAGE</span>
+            </div>
+            <div class="ride-cat-foot">
+              <div>
+                <h3 class="collection-card-title">车载储物</h3>
+                <span class="collection-card-meta"><span id="home-count-storage">10</span> 款商品</span>
+              </div>
+              <span class="ride-cat-arrow">→</span>
+            </div>
+          </article>
+
+          <article class="collection-card ride-cat-card" data-category="scent" role="link" tabindex="0" aria-label="进入车载香薰专区">
+            <div class="collection-poster">
+              <img id="home-cat-img-scent" src="assets/fragrance.webp" alt="车载香薰" loading="lazy" decoding="async" width="1000" height="1500">
+              <div class="poster-gradient"></div>
+              <span class="ride-cat-pill">FRAGRANCE</span>
+            </div>
+            <div class="ride-cat-foot">
+              <div>
+                <h3 class="collection-card-title">车载香薰</h3>
+                <span class="collection-card-meta"><span id="home-count-scent">10</span> 款商品</span>
+              </div>
+              <span class="ride-cat-arrow">→</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- 新品首推内容栏（杂志风不对称焦点排版，与四列分类入口区分风格） -->
+    <section class="new-arrivals-section editorial-drop-section" id="new-arrivals-section" aria-labelledby="new-arrivals-title">
+      <div class="section-container">
+        <div class="new-arrivals-header">
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <span class="editorial-kicker">EDITION SPOTLIGHT</span>
+            <h2 class="ride-sec-title" id="new-arrivals-title">新品首推</h2>
+            <span class="new-drop-pill" id="new-arrivals-pill">NEW DROP</span>
+          </div>
+          <button type="button" class="section-text-link" id="new-arrivals-all-btn">查看全部车品 <span aria-hidden="true">→</span></button>
+        </div>
+        <div class="editorial-drops-bento" id="new-arrivals-grid"></div>
+      </div>
+    </section>
+
+    <div id="cms-dynamic-sections-root"></div>
+
+    <!-- Contact 联系方式模块 -->
+    <section class="contact-band-section" id="contact-section" aria-labelledby="contact-sec-title">
+      <div class="section-container">
+        <div class="contact-band-grid">
+          <div class="contact-band-info">
+            <span class="editorial-kicker">GET IN TOUCH</span>
+            <h2 class="ride-sec-title" id="contact-sec-title" style="margin-top:6px;">Contact · 联系我们</h2>
+            <p class="contact-band-desc">车型适配核验、批量定制采购或售后安装协助，MODFORM 专属车品顾问为您提供一对一响应。</p>
+            <div class="contact-cards-grid">
+              <div class="contact-info-card">
+                <span class="contact-card-label">官方邮箱 EMAIL</span>
+                <div class="contact-card-val" id="contact-email-val">support@modform.auto</div>
+                <button type="button" class="contact-copy-btn" id="contact-email-copy-btn" data-copy="support@modform.auto">复制邮箱</button>
+              </div>
+              <div class="contact-info-card">
+                <span class="contact-card-label">官方客服微信 WECHAT</span>
+                <div class="contact-card-val" id="contact-wechat-val">MODFORM_Studio</div>
+                <button type="button" class="contact-copy-btn" id="contact-wechat-copy-btn" data-copy="MODFORM_Studio">复制微信号</button>
+              </div>
+              <div class="contact-info-card">
+                <span class="contact-card-label">服务时间 HOURS</span>
+                <div class="contact-card-val" id="contact-hours-val">每日 09:30 – 22:00</div>
+                <span class="contact-card-sub">工作日 & 周末均在线</span>
+              </div>
+
+            </div>
+          </div>
+          <form class="contact-quick-form" id="contact-inquiry-form">
+            <h3 style="margin:0 0 6px; font-size:1.05rem; color:#fff;">快速留言咨询</h3>
+            <p style="margin:0 0 14px; font-size:0.8rem; color:#8e95a2;">留下您的车型与需求，顾问将在 2 小时内回复。</p>
+            <div class="contact-form-row">
+              <input type="text" id="contact-name" placeholder="您的称呼（选填）" autocomplete="name">
+              <input type="text" id="contact-car" placeholder="您的车型与年份（如 2024款 小米 SU7）">
+            </div>
+            <input type="text" id="contact-way" placeholder="微信号 / 手机号 / 邮箱 *" required>
+            <textarea id="contact-msg" rows="3" placeholder="想咨询的商品、适配问题或合作需求 *" required></textarea>
+            <button type="submit" class="neon-primary-btn" style="width:100%; justify-content:center;">发送留言 →</button>
+            <div id="contact-form-feedback" style="font-size:0.8rem; color:#d8ff00; margin-top:8px; display:none;"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 荧光绿全宽订阅条  -->
+    <section class="ride-newsletter-band" aria-label="新品订阅">
+      <div class="ride-newsletter-inner">
+        <h2 id="newsletter-heading">订阅我们的邮件 · SUBSCRIBE TO OUR EMAILS</h2>
+        <p id="newsletter-sub">第一时间获取 MODFORM 限量车品套装与车主专属优惠。</p>
+        <form id="newsletter-form" class="ride-newsletter-form">
+          <input type="email" id="newsletter-email" placeholder="输入您的邮箱地址 / Email" aria-label="输入邮箱订阅" required>
+          <button type="submit" aria-label="提交订阅">→</button>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <!-- 视图 B：类目商品列表页 -->
+  <section id="category-view" class="subpage-section" style="display: none;">
+    <div class="subpage-container">
+      <div class="subpage-top-nav">
+        <button type="button" class="dark-outline-btn" id="cat-back-home-btn">← 返回首页</button>
+        <div class="cat-switcher-pills" id="category-tabs">
+          <button type="button" class="pill-switch" data-category="interior">内饰美学 (<span id="tab-count-interior">0</span>)</button>
+          <button type="button" class="pill-switch" data-category="exterior">外观升级 (<span id="tab-count-exterior">0</span>)</button>
+          <button type="button" class="pill-switch" data-category="storage">车载储物 (<span id="tab-count-storage">0</span>)</button>
+          <button type="button" class="pill-switch" data-category="scent">车载香薰 (<span id="tab-count-scent">0</span>)</button>
+          <button type="button" class="pill-switch" data-category="all">全部商品 (<span id="tab-count-all">0</span>)</button>
+        </div>
+      </div>
+
+      <div class="category-banner-header">
+        <div>
+          <span class="neon-tag" id="cat-en-label">COLLECTION</span>
+          <h2 id="cat-view-title">内饰美学</h2>
+        </div>
+      </div>
+
+
+
+      <!-- 优化后的独立两段式筛选与视图工具栏 -->
+      <div class="catalog-toolbar-bar" role="region" aria-label="商品筛选与排序工具栏">
+        <div class="toolbar-group toolbar-left">
+          <span class="toolbar-count-pill" id="result-count-label">共 0 件商品</span>
+          <span class="toolbar-divider" aria-hidden="true"></span>
+          <label class="filter-toggle-chip" id="in-stock-filter-label">
+            <input type="checkbox" id="in-stock-only-toggle">
+            <span>仅看有货</span>
+          </label>
+          <label class="sr-only" for="price-range-select">价格区间筛选</label>
+          <select id="price-range-select" class="toolbar-select" aria-label="价格区间筛选">
+            <option value="all">全部价格</option>
+            <option value="0-50">¥50 以下</option>
+            <option value="50-100">¥50 – ¥100</option>
+            <option value="100+">¥100 以上</option>
+          </select>
+        </div>
+        <div class="toolbar-group toolbar-right">
+          <label class="sr-only" for="sort-select">商品排序方式</label>
+          <select id="sort-select" class="toolbar-select">
+            <option value="sales-desc">销量：从高到低</option>
+            <option value="price-asc">价格：从低到高</option>
+            <option value="price-desc">价格：从高到低</option>
+          </select>
+
+        </div>
+      </div>
+
+      <div id="active-filter-bar" class="active-filter-bar" style="display: none;"></div>
+
+      <div class="product-grid" id="product-grid"></div>
+
+      <div class="catalog-bottom-nav" aria-label="底部品类快捷切换">
+        <span class="catalog-bottom-label">切换品类浏览</span>
+        <div class="cat-switcher-pills" id="category-tabs-bottom">
+          <button type="button" class="pill-switch" data-category="interior">内饰美学 (<span id="tab-bottom-count-interior">0</span>)</button>
+          <button type="button" class="pill-switch" data-category="exterior">外观升级 (<span id="tab-bottom-count-exterior">0</span>)</button>
+          <button type="button" class="pill-switch" data-category="storage">车载储物 (<span id="tab-bottom-count-storage">0</span>)</button>
+          <button type="button" class="pill-switch" data-category="scent">车载香薰 (<span id="tab-bottom-count-scent">0</span>)</button>
+          <button type="button" class="pill-switch" data-category="all">全部商品 (<span id="tab-bottom-count-all">0</span>)</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 视图 C：独立商品详情页 -->
+  <section id="product-detail-view" class="subpage-section" style="display: none;">
+    <div class="subpage-container">
+      <div class="subpage-top-nav" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <button type="button" class="dark-outline-btn" id="detail-back-btn">← 返回当前类目</button>
+          <span class="breadcrumb-text" id="detail-breadcrumb">首页 / 类目 / 商品详情</span>
+        </div>
+        <button type="button" class="dark-outline-btn" id="share-product-link-btn" style="padding:5px 11px; font-size:0.78rem;">🔗 复制商品直达链接</button>
+      </div>
+      <div id="detail-page-content"></div>
+    </div>
+  </section>
+
+  <!-- 视图 D：独立全页结账中心（含快递公司选择与极速达二次确认） -->
+  <section id="checkout-view" class="subpage-section" style="display: none;">
+    <div class="subpage-container">
+      <div class="subpage-top-nav" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button type="button" class="dark-outline-btn" id="close-checkout-modal">← 返回继续购物</button>
+          <span class="breadcrumb-text">首页 / 结账中心</span>
+        </div>
+        <span id="addr-saved-tip" style="font-size:0.78rem; color:var(--green-ok);">✓ 收货地址自动记忆</span>
+      </div>
+
+      <h2 id="checkout-modal-title" style="font-size:1.75rem; font-weight:800; margin-bottom:22px;">确认订单信息</h2>
+
+      <form id="checkout-form" class="checkout-page-grid clean-form">
+        <!-- 左栏：收货信息 + 快递公司选择 -->
+        <div class="checkout-page-panel">
+          <h3 class="checkout-section-title">1. 收货人及配送地址</h3>
+          <div class="form-row-2">
+            <div class="field">
+              <label>收货人姓名 *</label>
+              <input type="text" id="receiver-name" placeholder="请输入真实姓名" required>
+            </div>
+            <div class="field">
+              <label>手机号码 *</label>
+              <input type="tel" id="receiver-phone" placeholder="11位手机号" autocomplete="tel" inputmode="numeric" pattern="1[3-9][0-9]{9}" maxlength="11" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>所在地区（全国省 / 市 / 旗县区 / 直辖市）*</label>
+            <div class="region-grid-3">
+              <select id="addr-province" class="dark-select" required><option value="">选择省份/直辖市</option></select>
+              <select id="addr-city" class="dark-select" required><option value="">选择城市/辖区</option></select>
+              <select id="addr-district" class="dark-select" required><option value="">选择区/县/旗</option></select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>街道小区及详细门牌号 *</label>
+            <textarea id="receiver-address" rows="2" placeholder="如：XX街道XX花园3栋502室" required></textarea>
+          </div>
+
+          <div class="field">
+            <label>适配车型与订单备注</label>
+            <input type="text" id="order-note" placeholder="如：2026款大众途观L、放丰巢柜">
+          </div>
+
+          <h3 class="checkout-section-title" style="margin-top:24px;">2. 选择快递公司</h3>
+          <div class="courier-options-grid" id="courier-options-grid">
+            <label class="courier-card active">
+              <input type="radio" name="courierCompany" value="顺丰标快" checked>
+              <div class="courier-card-body">
+                <strong>顺丰标快</strong>
+                <span>预计 2-3 天送达 · 满 ¥99 包邮</span>
+              </div>
+              <span class="courier-fee-tag">免费</span>
+            </label>
+            <label class="courier-card">
+              <input type="radio" name="courierCompany" value="中通快递">
+              <div class="courier-card-body">
+                <strong>中通快递</strong>
+                <span>预计 2-4 天送达 · 全国通达</span>
+              </div>
+              <span class="courier-fee-tag">免费</span>
+            </label>
+            <label class="courier-card">
+              <input type="radio" name="courierCompany" value="圆通速递">
+              <div class="courier-card-body">
+                <strong>圆通速递</strong>
+                <span>预计 2-4 天送达 · 经济实惠</span>
+              </div>
+              <span class="courier-fee-tag">免费</span>
+            </label>
+            <label class="courier-card is-express">
+              <input type="radio" name="courierCompany" value="极速达">
+              <div class="courier-card-body">
+                <strong>极速达（顺丰次日/同城加急）</strong>
+                <span>仓库优先出库 · 极速专线直达</span>
+              </div>
+              <span class="courier-fee-tag is-paid">+¥15.0</span>
+            </label>
+          </div>
+
+          <!-- 极速达二次确认框 -->
+          <div id="express-confirm-box" class="express-confirm-box" style="display: none;">
+            <div>
+              <strong>⚡ 您已选择「极速达」加急配送</strong>
+              <p>将额外收取 ¥15.0 加急运费并安排仓库优先打包发出，请点击右侧按钮确认后提交订单。</p>
+            </div>
+            <button type="button" class="neon-primary-btn" id="confirm-express-btn">确认使用极速达</button>
+          </div>
+        </div>
+
+        <!-- 右栏：商品清单 + 支付方式 + 提交 -->
+        <div class="checkout-page-panel">
+          <h3 class="checkout-section-title">3. 订单商品清单</h3>
+          <div id="checkout-items-summary" class="checkout-items-summary"></div>
+
+          <div class="checkout-coupon-box">
+            <div class="coupon-row" style="margin-bottom:4px;">
+              <input type="text" id="checkout-coupon-input" placeholder="输入优惠码（选填）">
+              <button type="button" id="checkout-apply-coupon-btn">应用</button>
+            </div>
+            <p class="coupon-msg" id="checkout-coupon-msg" style="margin-bottom:0;"></p>
+          </div>
+          <div class="checkout-fee-breakdown">
+            <div class="summary-line"><span>商品小计</span><span id="checkout-subtotal-text">¥0.0</span></div>
+            <div class="summary-line discount-line" id="checkout-discount-row" style="display:none;"><span>优惠减免</span><span id="checkout-discount-text">-¥0.0</span></div>
+            <div class="summary-line"><span>配送方式（<span id="checkout-courier-label">顺丰标快</span>）</span><span id="checkout-shipping-fee">¥0.0</span></div>
+          </div>
+
+          <div class="payment-section" style="margin-top:16px;">
+            <label class="section-label">4. 选择支付方式</label>
+            <div class="pay-methods" id="pay-methods">
+              <button type="button" class="pay-method-btn active" data-method="wechat">微信支付</button>
+              <button type="button" class="pay-method-btn" data-method="alipay">支付宝</button>
+              <button type="button" class="pay-method-btn" data-method="stripe">在线银行卡 / Stripe</button>
+            </div>
+
+            <div class="pay-gateway-box">
+              <div class="pay-header-info">
+                <span>应付总额</span>
+                <strong class="pay-final-amount" id="modal-total-price">¥0.0</strong>
+              </div>
+
+              <div id="qr-pay-panel" class="qr-pay-panel">
+                <img id="payment-qr-img" src="" alt="收款码" class="real-qr-img">
+                <p class="pay-guide" id="pay-guide-text">请打开微信扫一扫完成付款</p>
+              </div>
+
+              <div id="external-pay-panel" class="external-pay-panel" style="display: none;">
+                <p class="pay-guide">在线银行卡 / Stripe 收银台：点击下方链接完成支付或使用扫码支付。</p>
+                <a id="external-pay-link" href="#" target="_blank" rel="noopener noreferrer" class="external-pay-cta is-disabled" aria-disabled="true">暂未配置在线收银链接</a>
+              </div>
+            </div>
+          </div>
+
+          <p class="payment-disclaimer">提交订单后将为您锁定对应商品库存，请在 30 分钟内完成付款。提交即表示您同意 <button type="button" class="inline-legal-link" id="checkout-terms-link" style="background:none;border:none;color:#d8ff00;text-decoration:underline;cursor:pointer;padding:0;font-size:inherit;">《用户服务协议》</button> 与 <button type="button" class="inline-legal-link" id="checkout-privacy-link" style="background:none;border:none;color:#d8ff00;text-decoration:underline;cursor:pointer;padding:0;font-size:inherit;">《隐私政策》</button>。</p>
+          <button type="submit" class="neon-primary-btn full-width" id="submit-order-btn">确认提交订单</button>
+        </div>
+      </form>
+
+      <div id="order-success-view" class="success-box checkout-success-panel" style="display: none;">
+        <div class="check-badge">✓</div>
+        <h4>订单已提交，库存已锁定</h4>
+        <p class="muted-text">请在 30 分钟内完成扫码或在线付款。支付成功后，系统将通过支付网关验签回调或商家后台核验自动更新订单状态：</p>
+        <pre class="receipt-card" id="order-receipt"></pre>
+        <div class="btn-group" style="flex-wrap:wrap; justify-content:center;">
+          <button type="button" class="neon-primary-btn" id="copy-order-btn">复制订单凭证</button>
+          <button type="button" class="dark-outline-btn" id="finish-order-btn">返回商店</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="nitro-footer ride-footer">
+    <div class="footer-inner">
+      <div class="ride-footer-links">
+        <strong>MODFORM</strong>
+        <button type="button" class="footer-policy-btn" id="footer-service-btn">车品顾问客服</button>
+        <button type="button" class="footer-policy-btn" id="footer-policy-btn">退换货与安装保障</button>
+        <button type="button" class="footer-policy-btn" id="footer-terms-btn">用户服务协议</button>
+        <button type="button" class="footer-policy-btn" id="footer-privacy-btn">隐私政策</button>
+        <span class="footer-copyright" id="footer-copyright-text" style="color:var(--text-muted);font-size:0.8rem;">© 2026 MODFORM</span>
+          <a id="footer-icp-link" class="footer-icp-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" style="display:none;color:var(--text-muted);font-size:0.78rem;text-decoration:none;"></a>
+      </div>
+      <div class="footer-right">
+        <div class="ride-pay-badges" aria-label="支持支付方式">
+          <span>微信支付</span>
+          <span>支付宝</span>
+          <span>VISA</span>
+          <span>Mastercard</span>
+          <span>Stripe</span>
+        </div>
+        <span id="footer-sync-status">实时服务状态</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 侧滑购物袋抽屉 -->
+  <div class="overlay" id="cart-overlay"></div>
+  <aside class="drawer" id="cart-drawer">
+    <div class="drawer-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <h3>我的购物袋</h3>
+        <button type="button" class="clear-cart-text-btn" id="clear-cart-btn" style="display:none;">清空</button>
+      </div>
+      <button type="button" class="close-btn" id="close-cart">✕</button>
+    </div>
+
+    <div class="shipping-progress-box">
+      <p class="shipping-text" id="shipping-text">满 ¥99 享顺丰包邮</p>
+      <div class="progress-track">
+        <div class="progress-fill" id="shipping-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <div class="cart-batch-bar" id="cart-batch-bar" style="display:none;">
+      <label class="cart-select-all-label">
+        <input type="checkbox" id="cart-select-all"> 全选
+      </label>
+      <button type="button" class="cart-batch-del-btn" id="cart-batch-delete-btn" disabled>批量删除 (0)</button>
+    </div>
+    <div class="drawer-body" id="cart-items"></div>
+
+    <div class="drawer-footer">
+      <div id="cart-upsell-box" class="cart-upsell-box" style="display:none;"></div>
+      <div id="cart-coupon-pills" class="cart-coupon-pills"></div>
+      <div class="coupon-row">
+        <input type="text" id="coupon-input" placeholder="输入优惠码（选填）">
+        <button type="button" id="apply-coupon-btn">应用</button>
+      </div>
+      <p class="coupon-msg" id="coupon-msg"></p>
+
+      <div class="price-summary">
+        <div class="summary-line">
+          <span>商品小计</span>
+          <span id="subtotal-price">¥0.0</span>
+        </div>
+        <div class="summary-line discount-line" id="bundle-discount-row" style="display: none;">
+          <span>升级组合套餐立减</span>
+          <span id="bundle-discount-amount">-¥0.0</span>
+        </div>
+        <div class="summary-line discount-line" id="discount-row" style="display: none;">
+          <span>优惠码减免</span>
+          <span id="discount-amount">-¥0.0</span>
+        </div>
+        <div class="summary-line total-line">
+          <span>实付合计</span>
+          <span id="total-price">¥0.0</span>
+        </div>
+      </div>
+
+      <button type="button" class="neon-primary-btn full-width" id="checkout-btn">前往结账</button>
+    </div>
+  </aside>
+
+  <!-- 弹窗 1：我的心愿单收藏夹 -->
+  <div class="modal-backdrop" id="wishlist-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-md">
+      <button type="button" class="modal-close" id="close-wishlist-modal">✕</button>
+      <h3 class="modal-title">我的心愿单</h3>
+      <div id="wishlist-container"></div>
+    </div>
+  </div>
+
+  <!-- 弹窗 2：用户登录 / 注册 / 车主中心 -->
+  <div class="modal-backdrop" id="auth-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-sm">
+      <button type="button" class="modal-close" id="close-auth-modal">✕</button>
+
+      <div id="auth-forms-view">
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active" id="tab-login">账号登录</button>
+          <button type="button" class="auth-tab" id="tab-register">新用户注册</button>
+        </div>
+
+        <form id="login-form" class="clean-form">
+          <div class="field">
+            <label>手机号 / 用户名</label>
+            <input type="text" id="login-account" placeholder="请输入账号或手机号" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label>密码</label>
+            <input type="password" id="login-password" placeholder="请输入密码" autocomplete="current-password" required>
+          </div>
+          <button type="submit" class="neon-primary-btn full-width">登录</button>
+        </form>
+
+        <form id="register-form" class="clean-form" style="display: none;">
+          <div class="field">
+            <label for="reg-name">车主昵称 *</label>
+            <input type="text" id="reg-name" placeholder="例如：陈先生" autocomplete="nickname" maxlength="20" required>
+          </div>
+          <div class="field">
+            <label for="reg-phone">手机号 *</label>
+            <input type="tel" id="reg-phone" placeholder="用于登录及查询订单物流" autocomplete="tel" inputmode="numeric" pattern="1[3-9][0-9]{9}" maxlength="11" required>
+          </div>
+          <div class="field">
+            <label for="reg-password">设置密码 *</label>
+            <input type="password" id="reg-password" placeholder="请设置至少 6 位登录密码" autocomplete="new-password" minlength="6" required>
+          </div>
+          <button type="submit" class="neon-primary-btn full-width">创建账号并登录</button>
+        </form>
+      </div>
+
+      <div id="profile-view" style="display: none;">
+        <h3 class="modal-title">车主中心</h3>
+        <p class="profile-welcome">当前登录：<strong id="profile-username"></strong> (<span id="profile-phone"></span>)</p>
+        <form id="profile-address-form" class="clean-form">
+          <div class="field">
+            <label>默认收货人</label>
+            <input type="text" id="saved-name" placeholder="结账时将自动填入">
+          </div>
+          <div class="field">
+            <label>默认联系电话</label>
+            <input type="tel" id="saved-phone" placeholder="11位手机号">
+          </div>
+          <div class="field">
+            <label>默认收货地址</label>
+            <textarea id="saved-address" rows="2" placeholder="省 / 市 / 区县旗 / 详细门牌号"></textarea>
+          </div>
+          <button type="submit" class="neon-primary-btn full-width">保存默认地址</button>
+        </form>
+        <button type="button" class="dark-outline-btn full-width" id="logout-btn" style="margin-top: 10px;">退出登录</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗 4：买家查看我的订单、物流与申请售后退换货 (RMA) -->
+  <div class="modal-backdrop" id="orders-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-md">
+      <button type="button" class="modal-close" id="close-orders-modal">✕</button>
+      <h3 class="modal-title">我的订单、物流与售后服务</h3>
+      <div class="buyer-order-tabs" id="buyer-order-tabs">
+        <button type="button" class="order-filter-pill active" data-order-status="all">全部</button>
+        <button type="button" class="order-filter-pill" data-order-status="待核验收款">待付款</button>
+        <button type="button" class="order-filter-pill" data-order-status="已付款·待发货">待发货</button>
+        <button type="button" class="order-filter-pill" data-order-status="已发货">已发货</button>
+        <button type="button" class="order-filter-pill" data-order-status="售后处理中">售后中</button>
+      </div>
+      <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+        <input type="text" id="buyer-order-search-input" placeholder="在本机订单中按手机号 / AT 订单号筛选..." style="flex:1; min-width:200px; padding:8px 10px; background:var(--bg-card); border:1px solid var(--border-dark); border-radius:4px; color:#fff; font-size:0.84rem;">
+      </div>
+      <form id="guest-order-lookup-form" class="guest-lookup-bar">
+        <input type="text" id="guest-lookup-order-id" placeholder="跨设备查单：输入 AT 订单号" autocomplete="off">
+        <input type="tel" id="guest-lookup-phone" placeholder="下单 11 位手机号" maxlength="11" inputmode="numeric" autocomplete="tel">
+        <button type="submit" class="dark-outline-btn" style="padding:7px 12px; font-size:0.8rem; white-space:nowrap;">服务端查单</button>
+      </form>
+      <div id="orders-list-container" class="orders-list"></div>
+    </div>
+  </div>
+
+  <!-- 弹窗 5：实时快递轨迹追踪详情 -->
+  <div class="modal-backdrop" id="tracking-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-sm">
+      <button type="button" class="modal-close" id="close-tracking-modal">✕</button>
+      <h3 class="modal-title">实时快递物流与订单轨迹</h3>
+      <div id="tracking-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- 弹窗 6：买家申请售后退换货 (RMA) -->
+  <div class="modal-backdrop" id="rma-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-sm">
+      <button type="button" class="modal-close" id="close-rma-modal">✕</button>
+      <h3 class="modal-title">申请售后 / 退换货服务</h3>
+      <form id="rma-apply-form" class="clean-form">
+        <input type="hidden" id="rma-order-id">
+        <div class="field">
+          <label>关联订单编号</label>
+          <input type="text" id="rma-order-display" readonly style="opacity:0.75;">
+        </div>
+        <div class="field">
+          <label>售后服务类型 *</label>
+          <select id="rma-type-select" class="dark-select" required>
+            <option value="退货退款">退货退款（7天无理由 / 退回商品并退款）</option>
+            <option value="换货补发">换货补发（尺寸不合 / 运输破损免费换新）</option>
+            <option value="仅退款">仅退款（未收到货 / 协商一致仅退款）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>售后原因与问题描述 *</label>
+          <textarea id="rma-reason-input" rows="2" placeholder="请简述原因，例如：拍错车型年份需要更换..." required></textarea>
+        </div>
+        <div class="field">
+          <label>寄回快递单号（选填，若已寄回请填写）</label>
+          <input type="text" id="rma-return-track" placeholder="例如：SF987654321">
+        </div>
+        <div class="field">
+          <label>上传实拍凭证照片（选填，破损或安装问题照片）</label>
+          <input type="file" id="rma-proof-file" accept="image/*" style="font-size:0.8rem;">
+        </div>
+        <button type="submit" class="neon-primary-btn full-width">提交售后申请</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 弹窗 7：车品顾问客服与售后保障说明 -->
+  <div class="modal-backdrop" id="service-policy-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-sm">
+      <button type="button" class="modal-close" id="close-service-policy-modal">✕</button>
+      <h3 class="modal-title" id="service-policy-title">车品顾问与购物保障</h3>
+      <div id="service-policy-body" style="font-size:0.86rem; color:#cbd5e1; line-height:1.7;"></div>
+    </div>
+  </div>
+
+  <nav class="mobile-nav-dock" aria-label="移动端快捷导航">
+    <button type="button" id="mobile-home-btn"><span aria-hidden="true">⌂</span>首页</button>
+    <button type="button" id="mobile-shop-btn"><span aria-hidden="true">▦</span>商品</button>
+    <button type="button" id="mobile-collections-btn"><span aria-hidden="true">◇</span>分类</button>
+    <button type="button" id="mobile-garage-btn"><span aria-hidden="true">◎</span>车型</button>
+    <button type="button" id="mobile-orders-btn"><span aria-hidden="true">≡</span>订单</button>
+  </nav>
+  <div class="toast-region" id="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- 隐藏弹出式车型匹配菜单弹窗 -->
+  <div class="modal-backdrop" id="garage-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-sm">
+      <button type="button" class="modal-close" id="close-garage-modal" aria-label="关闭车型匹配">✕</button>
+      <h3 class="modal-title">我的爱车 · 精准车型匹配</h3>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:12px;">选择您的爱车品牌、年份与型号，支持保存多辆爱车一键切换。</p>
+      <div id="saved-cars-bar" class="saved-cars-bar" style="display:none;"></div>
+      <div class="clean-form">
+        <div class="field">
+          <label for="car-make-select">1. 汽车品牌</label>
+          <select id="car-make-select" class="dark-select"><option value="">选择汽车品牌</option></select>
+        </div>
+        <div class="field">
+          <label for="car-year-select">2. 车辆年份</label>
+          <select id="car-year-select" class="dark-select"><option value="">选择车辆年份</option></select>
+        </div>
+        <div class="field">
+          <label for="car-model-select">3. 具体型号</label>
+          <select id="car-model-select" class="dark-select" disabled><option value="">先选品牌与年份</option></select>
+        </div>
+        <div class="garage-status" id="garage-status" role="status" aria-live="polite" style="min-height:20px; font-size:0.82rem;"></div>
+        <div style="display:flex; gap:10px; margin-top:8px;">
+          <button type="button" class="neon-primary-btn" id="garage-apply-btn" style="flex:1;">确认</button>
+          <button type="button" class="dark-outline-btn" id="reset-car-btn" style="display:none;">清除车型</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- 图片放大灯箱弹窗 -->
+  <div class="modal-backdrop" id="image-lightbox-modal" role="dialog" aria-modal="true">
+    <div class="lightbox-stage">
+      <button type="button" class="modal-close lightbox-close" id="close-lightbox-modal" aria-label="关闭大图">✕</button>
+      <img id="lightbox-img" src="" alt="图片放大预览">
+    </div>
+  </div>
+
+  <!-- 返回顶部悬浮按钮 -->
+  <button type="button" id="back-to-top-btn" class="back-to-top-btn" aria-label="返回页面顶部" title="返回顶部">↑</button>
+
+
+  <!-- 弹窗：用户服务协议 -->
+  <div class="modal-backdrop" id="terms-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-lg">
+      <button type="button" class="modal-close" id="close-terms-modal" aria-label="关闭用户服务协议">✕</button>
+      <h3 class="modal-title" id="terms-modal-title">用户服务协议 · Terms of Service</h3>
+      <div id="terms-modal-body" class="legal-modal-body" style="max-height:60vh;overflow-y:auto;font-size:0.85rem;line-height:1.75;color:#cbd5e1;white-space:pre-line;">
+一、服务说明与订单生效
+1. 本平台为用户提供汽车用品浏览、车型适配查询、在线下单及售后服务。
+2. 商品价格、库存与运费以提交订单时服务端核算结果为准；订单支付成功并经商家确认后即视为买卖合同成立。
+
+二、配送、退换货与售后保障
+1. 现货商品通常在付款后 48 小时内发出；选择「极速达」将按页面明示标准收取加急运费。
+2. 签收后 7 日内在不影响二次销售的前提下支持退换货；运输破损或发错商品由商家承担来回运费并优先补发。
+
+三、账号安全与合规使用
+1. 用户应妥善保管个人登录凭据，不得利用本平台从事恶意刷单、爬虫攻击、篡改价格或发布违法违规内容。
+2. 本站所有原创图文、商标及页面设计受知识产权法律保护，未经书面授权不得复制或商用。
+
+四、责任限制与争议解决
+如遇不可抗力（自然灾害、物流管制等）导致履约延迟，平台将及时通知并协助协商退款或改期。双方发生争议应优先友好协商，协商不成可依法向商家所在地有管辖权的人民法院提起诉讼。
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗：隐私政策 -->
+  <div class="modal-backdrop" id="privacy-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-lg">
+      <button type="button" class="modal-close" id="close-privacy-modal" aria-label="关闭隐私政策">✕</button>
+      <h3 class="modal-title" id="privacy-modal-title">隐私政策 · Privacy Policy</h3>
+      <div id="privacy-modal-body" class="legal-modal-body" style="max-height:60vh;overflow-y:auto;font-size:0.85rem;line-height:1.75;color:#cbd5e1;white-space:pre-line;">
+一、我们收集的信息及用途
+1. 订单履约信息：在您下单时收集收货人姓名、手机号、收货地址，仅用于商品发货、物流通知与售后服务。
+2. 选品与互动信息：您在「我的爱车」中保存的车型年份、商品问答、联系我们留言及订阅邮箱，仅用于车型适配筛选、客服回复与新品优惠推送。
+3. 支付安全声明：本平台不收集、不存储您的银行卡号、支付密码或 CVV 安全码，在线支付均由持牌第三方支付机构完成。
+
+二、信息存储与安全保护
+我们采用 HTTPS 加密传输、密码哈希加密（PBKDF2）、访问权限隔离与最小必要原则保护您的个人数据，不会向无关第三方出售或非法共享您的个人信息。
+
+三、您的权利（查询、更正与删除）
+您有权随时查看、更正您的账号与车库信息，或通过页面「Contact · 联系我们」中的官方邮箱申请退订邮件及删除个人历史数据，我们将在核实身份后及时处理。
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 站内自定义页面弹窗（顶部导航自定义图文页） -->
+  <div class="modal-backdrop" id="custom-page-modal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-lg">
+      <button type="button" class="modal-close" id="close-custom-page-modal" aria-label="关闭弹窗">✕</button>
+      <h3 class="modal-title" id="custom-page-modal-title">品牌专题</h3>
+      <div id="custom-page-modal-body" class="legal-modal-body" style="max-height:65vh;overflow-y:auto;font-size:0.9rem;line-height:1.8;color:#d6dce6;white-space:pre-line;"></div>
+    </div>
+  </div>
+
+  <!-- 站内通用确认弹窗（替代浏览器原生 confirm） -->
+  <div class="modal-backdrop" id="ui-dialog-modal" role="dialog" aria-modal="true">
+    <div class="modal-card" style="max-width:420px;">
+      <h3 class="modal-title" id="ui-dialog-title" style="margin-bottom:10px;">操作确认</h3>
+      <p id="ui-dialog-msg" style="font-size:0.88rem; color:#cbd5e1; line-height:1.65; margin:0 0 18px;"></p>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" class="dark-outline-btn" id="ui-dialog-cancel">取消</button>
+        <button type="button" class="neon-primary-btn" id="ui-dialog-ok">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主页全局轻提示 Toast（替代浏览器原生 alert） -->
+  <div id="site-toast" class="site-toast" role="status" aria-live="polite"></div>
+
+  <script src="data.js?v=20261120v4"></script>
+  <script src="script.js?v=20261120v4"></script>
+</body>
+</html>
